@@ -35,3 +35,4 @@ Thumbs.db
 vid/*.mp4 
 "vid/" 
 "~$*" 
+"scripts/" 
