@@ -461,10 +461,8 @@ def build_workbook() -> Workbook:  # noqa: C901 — single builder is intentiona
     item(
         "Phase 2", "Communication", "WhatsApp Business API",
         "Live messaging for 5-ward pilot",
-        1000, 0.10,
-        "Per-message pricing (July 2025). Utility templates FREE within "
-        "24h customer service window. Rs. 0.145/utility template only "
-        "outside window. ~20% complaints expect notification outside CSW.",
+        1000, 0.029,
+        "20% of complaints notified outside 24h CSW × Rs. 0.145/utility template = Rs. 0.029/complaint avg",
     )
     item(
         "Phase 2", "Communication", "SendGrid",
@@ -578,10 +576,8 @@ def build_workbook() -> Workbook:  # noqa: C901 — single builder is intentiona
         "Phase 4", "Infrastructure", "Azure Database for PostgreSQL",
         "High-availability production DB with geo-redundant backups "
         "and Indian data residency compliance",
-        0.5, 33600,
-        "GP D2ds v6 + Zone-Redundant HA (primary + secondary both\n"
-        "     billed = 2x compute). PostgreSQL Flexible Server has no\n"
-        "     Business Critical tier.",
+        0.5, f"=ROUND(163.52*2*{fx_ref},0)",
+        "GP D2ds v6 + Zone-Redundant HA = 2× compute of Phase 3 rate ($163.52/mo × 2 × FX)",
     )
     item(
         "Phase 4", "Infrastructure", "Azure Blob Storage",
@@ -648,7 +644,8 @@ def build_workbook() -> Workbook:  # noqa: C901 — single builder is intentiona
          "per month", 1, 18000,
          "Consumption plan, 3 min replicas zone-redundant — recurring")
     item("Phase 5", "Infrastructure", "Azure Database for PostgreSQL",
-         "per month", 1, 33600, "Recurring")
+         "per month", 1, f"=ROUND(163.52*2*{fx_ref},0)",
+         "GP D2ds v6 + Zone-Redundant HA = 2× compute ($163.52/mo × 2 × FX) — recurring")
     item("Phase 5", "Infrastructure", "Azure Blob Storage",
          "per month", 1, 4000, "Recurring")
     item("Phase 5", "Infrastructure", "Azure Monitor",
