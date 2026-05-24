@@ -16,6 +16,7 @@ from openpyxl.utils import get_column_letter
 
 
 OUTPUT_FILENAME = "Delhi_PS_CRM_Quotation.xlsx"
+FX = 95.7   # USD → INR mid-market rate (updated from 84)
 
 # ─── Style constants ───────────────────────────────────────────────
 FONT_TITLE = Font(name="Calibri", size=16, bold=True, color="1F3864")
@@ -174,6 +175,19 @@ def build_workbook() -> Workbook:  # noqa: C901 — single builder is intentiona
         _border_row(ws, row, 1, 8)
         row += 1
 
+    # FX rate row — visible in Section 1 and referenced by formulas
+    ws.merge_cells(start_row=row, start_column=1, end_row=row, end_column=2)
+    ws.merge_cells(start_row=row, start_column=4, end_row=row, end_column=8)
+    ws.cell(row=row, column=1, value="USD → INR Rate:").font = FONT_BOLD_NAVY
+    ws.cell(row=row, column=1).alignment = AL
+    fx_cell = ws.cell(row=row, column=3, value=FX)
+    fx_cell.number_format = "0.0"
+    fx_cell.alignment = AR
+    ws.cell(row=row, column=4, value="Mid-market rate for cost formulas").alignment = AL
+    _border_row(ws, row, 1, 8)
+    fx_ref = f"$C${row}"  # absolute cell reference for formulas
+    row += 1
+
     _thick_box(ws, s1, row - 1, 1, 8)
     row += 2
 
@@ -309,7 +323,7 @@ def build_workbook() -> Workbook:  # noqa: C901 — single builder is intentiona
         name: str,
         specs: str,
         qty,       # int, float, or str formula like "=5*0.5"
-        unit,      # int or float — the raw unit cost number
+        unit,      # int, float, or str formula (e.g. "=ROUND(330*$C$10,0)")
         notes: str = "",
     ) -> None:
         nonlocal row
@@ -321,7 +335,7 @@ def build_workbook() -> Workbook:  # noqa: C901 — single builder is intentiona
         ws.cell(row=row, column=3, value=name).alignment = AL
         ws.cell(row=row, column=4, value=specs).alignment = AL
 
-        # Quantity cell (col E) — raw hardcoded input
+        # Quantity cell (col E) — input (number or formula)
         # Cast whole-number floats to int so Excel stores them cleanly
         if isinstance(qty, float) and qty == int(qty):
             qty = int(qty)
@@ -329,7 +343,7 @@ def build_workbook() -> Workbook:  # noqa: C901 — single builder is intentiona
         qc.number_format = _num_fmt(qty)
         qc.alignment = AR
 
-        # Unit Cost cell (col F) — raw hardcoded input
+        # Unit Cost cell (col F) — input (number or formula)
         if isinstance(unit, float) and unit == int(unit):
             unit = int(unit)
         uc = ws.cell(row=row, column=6, value=unit)
@@ -405,8 +419,8 @@ def build_workbook() -> Workbook:  # noqa: C901 — single builder is intentiona
     item(
         "Phase 1", "Contingency", "Contingency Reserve",
         "Buffer for unexpected API overages, infra spikes, or integration issues",
-        1, 2500,
-        "~5% of phase operational costs",
+        1, 5000,
+        "Rs. 5,000 per half-month",
     )
     phase_subtotal("Phase 1")
 
@@ -440,17 +454,17 @@ def build_workbook() -> Workbook:  # noqa: C901 — single builder is intentiona
     item(
         "Phase 2", "AI and ML", "Gemini 2.5 Flash-Lite API",
         "AI classification for 1,000 pilot complaints",
-        1000, 0.05,
-        "$0.10/M input + $0.40/M output @ 84 INR/USD, "
-        "30% voice mix = Rs. 0.05/call",
+        1000, 0.057,
+        "$0.10/M input + $0.40/M output @ 95.7 INR/USD, "
+        "30% voice mix = Rs. 0.057/call",
     )
     item(
         "Phase 2", "Communication", "WhatsApp Business API",
         "Live messaging for 5-ward pilot",
         1000, 0.10,
-        "Service convos FREE (citizen-initiated 24h window). "
-        "Rs. 0.145/utility template × 2 notifs × 20% outside "
-        "window = Rs. 0.058/complaint",
+        "Per-message pricing (July 2025). Utility templates FREE within "
+        "24h customer service window. Rs. 0.145/utility template only "
+        "outside window. ~20% complaints expect notification outside CSW.",
     )
     item(
         "Phase 2", "Communication", "SendGrid",
@@ -461,8 +475,8 @@ def build_workbook() -> Workbook:  # noqa: C901 — single builder is intentiona
     item(
         "Phase 2", "Contingency", "Contingency Reserve",
         "Buffer for unexpected API overages, infra spikes, or integration issues",
-        1, 2500,
-        "~5% of phase operational costs",
+        1, 5000,
+        "Rs. 5,000 per half-month",
     )
     phase_subtotal("Phase 2")
 
@@ -477,15 +491,15 @@ def build_workbook() -> Workbook:  # noqa: C901 — single builder is intentiona
     )
     item(
         "Phase 3", "Infrastructure", "Azure Container Apps",
-        "Scaled backend for 50 wards",
-        0.5, 8000,
-        "Medium instance",
+         "Scaled backend for 50 wards",
+         0.5, 16000,
+         "Medium instance",
     )
     item(
         "Phase 3", "Infrastructure", "Azure Database for PostgreSQL Flexible",
         "Production-grade database with backups",
-        0.5, 5000,
-        "General Purpose tier",
+        0.5, f"=ROUND(163.52*{fx_ref},0)",
+        "General Purpose D2ds v6, 2 vCore, 8 GiB — $163.52/mo PAYG × FX",
     )
     item(
         "Phase 3", "Infrastructure", "Azure Blob Storage",
@@ -507,9 +521,9 @@ def build_workbook() -> Workbook:  # noqa: C901 — single builder is intentiona
     )
     item(
         "Phase 3", "AI and ML", "Gemini 2.5 Flash-Lite API",
-        "AI classification for 20,000 complaints",
-        20000, 0.015,
-        "Rs. 0.012/call avg with voice mix, rounded up",
+         "AI classification for 20,000 complaints",
+         20000, 0.017,
+         "Rs. 0.017/call avg with voice mix, rounded up",
     )
     item(
         "Phase 3", "AI and ML", "Azure Machine Learning",
@@ -526,21 +540,21 @@ def build_workbook() -> Workbook:  # noqa: C901 — single builder is intentiona
     )
     item(
         "Phase 3", "Communication", "SendGrid Essentials 50K",
-        "$19.95/mo = Rs. 1,676/mo",
-        0.5, 1676,
+        "$19.95/mo (converted via FX cell)",
+        0.5, f"=ROUND(19.95*{fx_ref},0)",
         "Essentials plan",
     )
     item(
         "Phase 3", "Infrastructure", "Azure Front Door CDN",
         "Officer dashboard CDN, domain, SSL",
-        0.5, 1500,
-        "Dashboard goes live",
+        0.5, f"=ROUND(330*{fx_ref},0)",
+        "Premium tier — managed WAF ruleset + DDoS ($330/mo × FX)",
     )
     item(
         "Phase 3", "Contingency", "Contingency Reserve",
         "Buffer for unexpected API overages, infra spikes, or integration issues",
-        1, 4000,
-        "~5% of phase operational costs",
+        1, 5000,
+        "Rs. 5,000 per half-month",
     )
     phase_subtotal("Phase 3")
 
@@ -556,15 +570,18 @@ def build_workbook() -> Workbook:  # noqa: C901 — single builder is intentiona
     item(
         "Phase 4", "Infrastructure", "Azure Container Apps",
         "Full-scale auto-scaling for 272 wards",
-        0.5, 15000,
-        "Production with zone redundancy",
+        0.5, 18000,
+        "Consumption plan, min 3 replicas across AZs for zone\n"
+        "     redundancy (no dedicated plan required)",
     )
     item(
         "Phase 4", "Infrastructure", "Azure Database for PostgreSQL",
         "High-availability production DB with geo-redundant backups "
         "and Indian data residency compliance",
-        0.5, 12000,
-        "Business Critical tier",
+        0.5, 33600,
+        "GP D2ds v6 + Zone-Redundant HA (primary + secondary both\n"
+        "     billed = 2x compute). PostgreSQL Flexible Server has no\n"
+        "     Business Critical tier.",
     )
     item(
         "Phase 4", "Infrastructure", "Azure Blob Storage",
@@ -575,25 +592,26 @@ def build_workbook() -> Workbook:  # noqa: C901 — single builder is intentiona
     item(
         "Phase 4", "Infrastructure", "Azure Monitor",
         "Full production observability with custom dashboards",
-        0.5, 3000,
+        0.5, 5000,
         "90-day log retention",
     )
     item(
         "Phase 4", "Infrastructure", "Azure Service Bus",
-        "Premium tier guaranteed delivery at 1L/month",
-        0.5, 2000,
-        "Premium tier",
+        "Standard tier — 100K msgs/mo is well within Standard limits.\n"
+        "     Premium ($677+/mo) is not warranted at this volume.",
+        0.5, 1100,
+        "Standard tier",
     )
     item(
         "Phase 4", "Infrastructure", "Azure Front Door CDN",
         "Full production CDN with WAF and DDoS protection",
-        0.5, 3000,
-        "WAF enabled",
+        0.5, f"=ROUND(330*{fx_ref},0)",
+        "Premium tier — managed WAF ruleset + DDoS ($330/mo × FX)",
     )
     item(
         "Phase 4", "AI and ML", "Gemini 2.5 Flash-Lite API",
         "Full-scale classification at 75,000 complaints/month",
-        75000, 0.012,
+        75000, 0.014,
         "Full scale with 30% voice mix",
     )
     item(
@@ -606,19 +624,20 @@ def build_workbook() -> Workbook:  # noqa: C901 — single builder is intentiona
         "Phase 4", "Communication", "WhatsApp Business API",
         "Full Delhi citizen messaging at 75K conversations/month",
         75000, 0.06,
-        "Peak communication cost",
+        "Per-message pricing (July 2025). Utility templates within\n"
+        "     24h CSW are FREE. Rs. 0.145/message only outside window.",
     )
     item(
         "Phase 4", "Communication", "SendGrid Essentials 100K",
-        "$34.95/mo = Rs. 2,940/mo",
-        0.5, 2940,
+        "$34.95/mo (converted via FX cell)",
+        0.5, f"=ROUND(34.95*{fx_ref},0)",
         "Pro plan",
     )
     item(
         "Phase 4", "Contingency", "Contingency Reserve",
         "Buffer for unexpected API overages, infra spikes, or integration issues",
-        1, 4000,
-        "~5% of phase operational costs",
+        1, 5000,
+        "Rs. 5,000 per half-month",
     )
     phase_subtotal("Phase 4")
 
@@ -626,34 +645,39 @@ def build_workbook() -> Workbook:  # noqa: C901 — single builder is intentiona
     # PHASE 5 — Steady State (monthly recurring)
     # ────────────────────────────────────────────────────────────
     item("Phase 5", "Infrastructure", "Azure Container Apps",
-         "per month", 1, 15000, "Recurring")
+         "per month", 1, 18000,
+         "Consumption plan, 3 min replicas zone-redundant — recurring")
     item("Phase 5", "Infrastructure", "Azure Database for PostgreSQL",
-         "per month", 1, 12000, "Recurring")
+         "per month", 1, 33600, "Recurring")
     item("Phase 5", "Infrastructure", "Azure Blob Storage",
          "per month", 1, 4000, "Recurring")
     item("Phase 5", "Infrastructure", "Azure Monitor",
-         "per month", 1, 3000, "Recurring")
+         "per month", 1, 5000, "Recurring")
     item("Phase 5", "Infrastructure", "Azure Service Bus",
-         "per month", 1, 2000, "Recurring")
+         "per month", 1, 1100, "Standard tier — recurring")
     item("Phase 5", "Infrastructure", "Azure Front Door CDN",
-         "per month", 1, 3000, "Recurring")
+         "per month", 1, f"=ROUND(330*{fx_ref},0)", "Recurring")
     item("Phase 5", "AI and ML", "Gemini 2.5 Flash-Lite API",
-         "per month", 1, 1200, "Recurring")
+         "per month", 1, 1400, "Recurring")
     item("Phase 5", "AI and ML", "Azure Machine Learning",
          "per month amortized", 1, 5000, "Quarterly retraining")
     item("Phase 5", "Communication", "WhatsApp Business API",
-         "per month", 1, 6000, "Recurring")
+         "per month", 1, 6000,
+         "Per-message pricing (July 2025) — recurring. Meta bills INR\n"
+         "     directly for India.")
     item("Phase 5", "Communication", "SendGrid Essentials 100K",
-         "per month", 1, 2940, "Recurring")
+         "per month", 1, f"=ROUND(34.95*{fx_ref},0)", "Recurring")
     item("Phase 5", "Infrastructure", "Azure backup and compliance",
          "per month", 1, 1500, "Recurring")
     item("Phase 5", "Infrastructure", "Azure Monitor log analytics",
-         "per month", 1, 750, "Recurring")
+         "per month", 1, f"=ROUND(30*2.76*{fx_ref},0)",
+         "Log Analytics PAYG: ~30 GB/mo ingested × $2.76/GB × FX.\n"
+         "     5 GB/mo free. Source: azure.microsoft.com/pricing/details/monitor")
     item(
         "Phase 5", "Contingency", "Contingency Reserve",
         "Buffer for unexpected API overages, infra spikes, or integration issues",
-        1, 2500,
-        "~5% of phase operational costs",
+        1, 10000,
+        "Rs. 5,000 per half-month × 2 = Rs. 10,000/month",
     )
     phase_subtotal("Phase 5")
 
