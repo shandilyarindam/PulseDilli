@@ -37,3 +37,4 @@ vid/*.mp4
 "~$*" 
 "scripts/" 
 quotation-sheet/generate_quotation.py
+scripts/
