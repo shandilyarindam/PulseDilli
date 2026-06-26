@@ -30,7 +30,7 @@ def try_rpc_migration(sql: str) -> bool:
 
 def main():
     print("=" * 55)
-    print("  Delhi PS-CRM -- Database Migration")
+    print("  Jan Samadhan -- Database Migration")
     print("=" * 55)
     print()
 

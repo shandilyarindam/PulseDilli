@@ -148,7 +148,7 @@ export default function ManageComplaintModal({
     >
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-[#1B3A5C]">
+          <DialogTitle className="flex items-center gap-2 text-[var(--brand)]">
             Manage Complaint
             {complaint && (
               <Badge variant="outline" className="ml-1 font-mono text-xs">
@@ -180,18 +180,18 @@ export default function ManageComplaintModal({
             )}
             
             {/* ── Complaint Details (Read Only) ── */}
-            <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+            <div className="rounded-lg border border-[var(--border-color)] bg-[var(--surface-elevated)] p-4">
               <div className="grid grid-cols-2 gap-3 text-sm">
                 <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">
                     Category
                   </p>
-                  <p className="mt-0.5 font-medium text-slate-700">
+                  <p className="mt-0.5 font-medium text-[var(--text-primary)]">
                     {complaint.category || "Uncategorized"}
                   </p>
                 </div>
                 <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">
                     Urgency
                   </p>
                   <Badge
@@ -206,41 +206,41 @@ export default function ManageComplaintModal({
                   </Badge>
                 </div>
                 <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">
                     Location
                   </p>
-                  <p className="mt-0.5 font-medium text-slate-700">
+                  <p className="mt-0.5 font-medium text-[var(--text-primary)]">
                     {complaint.location || "—"}
                   </p>
                 </div>
                 <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">
                     Ward
                   </p>
-                  <p className="mt-0.5 font-medium text-slate-700">
+                  <p className="mt-0.5 font-medium text-[var(--text-primary)]">
                     {complaint.ward || "—"}
                   </p>
                 </div>
               </div>
               <div className="mt-3">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">
                   Summary
                 </p>
-                <p className="mt-0.5 text-sm leading-relaxed text-slate-700">
+                <p className="mt-0.5 text-sm leading-relaxed text-[var(--text-primary)]">
                   {complaint.summary || "No summary available"}
                 </p>
               </div>
             </div>
 
             {/* ── Divider ── */}
-            <div className="border-t border-slate-200" />
+            <div className="border-t border-[var(--border-color)]" />
 
             {/* ── Assign Officer Section (show when focus is null or 'assign') ── */}
             {(focus === null || focus === undefined || focus === "assign") && (
               <div>
                 <div className="mb-3 flex items-center gap-2">
                   <UserPlus className="h-4 w-4 text-[#2E7D9E]" />
-                  <h3 className="text-sm font-semibold text-slate-800">
+                  <h3 className="text-sm font-semibold text-[var(--text-primary)]">
                     Assign Officer
                   </h3>
                   {focus === "assign" && (
@@ -250,9 +250,9 @@ export default function ManageComplaintModal({
                   )}
                 </div>
                 {complaint.assigned_to && (
-                  <p className="mb-2 text-xs text-slate-500">
+                  <p className="mb-2 text-xs text-[var(--text-secondary)]">
                     Currently assigned to:{" "}
-                    <span className="font-medium text-slate-700">
+                    <span className="font-medium text-[var(--text-primary)]">
                       {complaint.assigned_to}
                     </span>
                   </p>
@@ -262,7 +262,7 @@ export default function ManageComplaintModal({
                     value={selectedOfficer}
                     onValueChange={(value: string | null) => setSelectedOfficer(value ?? "")}
                   >
-                    <SelectTrigger className="flex-1 bg-white">
+                    <SelectTrigger className="flex-1 bg-[var(--surface)]">
                       <SelectValue placeholder="Select an officer" />
                     </SelectTrigger>
                     <SelectContent>
@@ -276,7 +276,7 @@ export default function ManageComplaintModal({
                   <button
                     onClick={handleAssignOfficer}
                     disabled={!selectedOfficer || assigning}
-                    className="rounded-lg bg-[#1B3A5C] px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-[#152d48] disabled:cursor-not-allowed disabled:opacity-50"
+                    className="rounded-lg bg-[var(--brand)] px-5 py-2 text-sm font-medium text-[var(--btn-primary-fg)] transition-colors hover:bg-[var(--brand-hover)] disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     {assigning ? "Assigning..." : "Assign"}
                   </button>
@@ -286,7 +286,7 @@ export default function ManageComplaintModal({
 
             {/* ── Divider (only when both sections visible) ── */}
             {(focus === null || focus === undefined) && (
-              <div className="border-t border-slate-200" />
+              <div className="border-t border-[var(--border-color)]" />
             )}
 
             {/* ── Resolve Section (show when focus is null or 'resolve') ── */}
@@ -294,7 +294,7 @@ export default function ManageComplaintModal({
               <div>
                 <div className="mb-3 flex items-center gap-2">
                   <CheckCircle className="h-4 w-4 text-emerald-600" />
-                  <h3 className="text-sm font-semibold text-slate-800">
+                  <h3 className="text-sm font-semibold text-[var(--text-primary)]">
                     Mark as Resolved
                   </h3>
                   {focus === "resolve" && (
@@ -304,7 +304,7 @@ export default function ManageComplaintModal({
                   )}
                 </div>
                 <div>
-                  <label className="mb-1.5 block text-xs font-medium text-slate-500">
+                  <label className="mb-1.5 block text-xs font-medium text-[var(--text-secondary)]">
                     Officer Notes
                   </label>
                   <textarea
@@ -314,10 +314,10 @@ export default function ManageComplaintModal({
                       if (e.target.value.trim()) setResolveError(false);
                     }}
                     placeholder="Describe the action taken to resolve this complaint..."
-                    className={`w-full rounded-lg border bg-white px-3 py-2 text-sm text-slate-700 placeholder-slate-400 outline-none transition-colors focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400 ${
+                    className={`w-full rounded-lg border bg-[var(--surface)] px-3 py-2 text-sm text-[var(--text-primary)] placeholder-slate-400 outline-none transition-colors focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400 ${
                       resolveError
                         ? "border-red-400 focus:border-red-400 focus:ring-red-400"
-                        : "border-slate-200"
+                        : "border-[var(--border-color)]"
                     }`}
                     rows={3}
                   />
@@ -330,7 +330,7 @@ export default function ManageComplaintModal({
                 <button
                   onClick={handleMarkResolved}
                   disabled={resolving}
-                  className="mt-3 w-full rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="mt-3 w-full rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-medium text-[var(--btn-primary-fg)] transition-colors hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {resolving ? "Resolving..." : "Mark Resolved"}
                 </button>

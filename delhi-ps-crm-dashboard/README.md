@@ -1,6 +1,6 @@
-# Delhi PS-CRM - Admin Dashboard
+# Jan Samadhan - Admin Dashboard
 
-Real-time civic grievance management dashboard for Delhi PS-CRM. Built for government officers to manage, assign, track, and resolve citizen complaints filed via WhatsApp.
+Real-time civic grievance management dashboard for Jan Samadhan. Built for government officers to manage, assign, track, and resolve citizen complaints filed via WhatsApp.
 
 ## Live Dashboard
 [project-tf415.vercel.app](https://project-tf415.vercel.app)
@@ -40,8 +40,8 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 
 Open [http://localhost:3000](http://localhost:3000)
 
-## Part of Delhi PS-CRM
+## Part of Jan Samadhan
 
-This dashboard is part of the [Delhi PS-CRM](https://github.com/shandilyarindam/delhi-ps-crm) system - an AI-powered WhatsApp civic grievance management platform serving all 272 wards of Delhi.
+This dashboard is part of the [Jan Samadhan](https://github.com/shandilyarindam/delhi-ps-crm) system - an AI-powered WhatsApp civic grievance management platform serving all 272 wards of Delhi.
 
 Built by Team 5Baddies, NSUT.

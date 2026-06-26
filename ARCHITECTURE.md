@@ -1,8 +1,8 @@
-# Delhi PS-CRM Architecture Documentation
+# Jan Samadhan Architecture Documentation
 
 ## System Overview
 
-Delhi PS-CRM is an AI-powered WhatsApp civic grievance management system serving 20 million citizens across all 272 wards of Delhi. The platform enables citizens to file complaints through WhatsApp in multiple Indian languages, with automatic AI classification, intelligent routing to government departments, and ML-based escalation for unresolved issues. Built for government-scale operations with real-time monitoring, officer accountability, and comprehensive audit trails.
+Jan Samadhan is an AI-powered WhatsApp civic grievance management system serving 20 million citizens across all 272 wards of Delhi. The platform enables citizens to file complaints through WhatsApp in multiple Indian languages, with automatic AI classification, intelligent routing to government departments, and ML-based escalation for unresolved issues. Built for government-scale operations with real-time monitoring, officer accountability, and comprehensive audit trails.
 
 ## System Architecture Overview
 

@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
-import { supabase } from "@/lib/supabase";
+import { useEffect, useState } from "react";
 import {
   Card,
   CardContent,
@@ -10,285 +9,489 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  FileText,
   AlertCircle,
   CheckCircle,
   Users,
   AlertTriangle,
+  Smile,
+  Zap,
+  Droplet,
+  TrendingUp,
+  ClipboardList,
+  Hourglass,
+  Shield,
+  MapPin,
+  Calendar,
+  ChevronDown,
+  Info,
+  ArrowUpRight,
+  ArrowRight,
+  Plus,
+  Minus,
+  Target,
+  FileText,
+  Road,
+  HardHat,
+  Sparkles,
 } from "lucide-react";
-import {
-  ticketId,
-  dept,
-  STATUS_COLOR,
-  type Status,
-  fmtDate,
-} from "@/lib/constants";
-import dynamic from "next/dynamic";
+import Map, { Source, Layer, NavigationControl } from "react-map-gl/maplibre";
+import "maplibre-gl/dist/maplibre-gl.css";
 
-/* ── Mini-map (Leaflet, SSR-safe) ────────────────────────────── */
-const DashboardMap = dynamic(() => import("@/components/dashboard-map"), {
-  ssr: false,
-  loading: () => (
-    <div className="flex h-full items-center justify-center text-sm text-slate-400">
-      Loading map...
-    </div>
-  ),
-});
-
-/* ── Types ────────────────────────────────────────────────────── */
-interface Complaint {
-  id: string;
-  summary: string | null;
-  category: string | null;
-  status: string | null;
-  urgency: string | null;
-  timestamp: string | null;
-  location: string | null;
-  ward: string | null;
-}
-
-interface Stats {
-  total: number;
-  open: number;
-  assigned: number;
-  resolved: number;
-  critical: number;
-}
-
-/* ── Page ─────────────────────────────────────────────────────── */
-export default function DashboardPage() {
-  const [stats, setStats] = useState<Stats>({
-    total: 0,
-    open: 0,
-    assigned: 0,
-    resolved: 0,
-    critical: 0,
-  });
-  const [recent, setRecent] = useState<Complaint[]>([]);
-  const [allComplaints, setAllComplaints] = useState<Complaint[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchData = useCallback(async () => {
-    try {
-      const { data, error } = await supabase
-        .from("raw_complaints")
-        .select("id,summary,category,status,urgency,timestamp,location,ward")
-        .order("timestamp", { ascending: false });
-
-      if (error) throw error;
-      const rows = (data || []) as Complaint[];
-      setAllComplaints(rows);
-      setRecent(rows.slice(0, 10));
-
-      const s: Stats = { total: 0, open: 0, assigned: 0, resolved: 0, critical: 0 };
-      for (const r of rows) {
-        s.total++;
-        if (r.status === "open") s.open++;
-        if (r.status === "assigned") s.assigned++;
-        if (r.status === "resolved") s.resolved++;
-        if (r.urgency === "Critical" && r.status !== "resolved") s.critical++;
+const delhiBoundaryData = {
+  type: "FeatureCollection",
+  features: [
+    {
+      type: "Feature",
+      properties: {},
+      geometry: {
+        type: "Polygon",
+        coordinates: [
+          [
+            [76.838, 28.404],
+            [77.348, 28.404],
+            [77.348, 28.883],
+            [76.838, 28.883],
+            [76.838, 28.404]
+          ]
+        ]
       }
-      setStats(s);
-    } catch (err) {
-      console.error("Failed to fetch dashboard data:", err);
-      setError("Failed to load dashboard data. Please refresh the page.");
-    } finally {
-      setLoading(false);
     }
-  }, []);
+  ]
+};
+
+const complaintPointsData = {
+  type: "FeatureCollection",
+  features: [
+    { type: "Feature", properties: { priority: "high" }, geometry: { type: "Point", coordinates: [77.1025, 28.7041] } },
+    { type: "Feature", properties: { priority: "high" }, geometry: { type: "Point", coordinates: [77.2090, 28.6139] } },
+    { type: "Feature", properties: { priority: "medium" }, geometry: { type: "Point", coordinates: [77.0697, 28.5355] } },
+    { type: "Feature", properties: { priority: "low" }, geometry: { type: "Point", coordinates: [77.3000, 28.6300] } },
+  ]
+};
+
+export default function DashboardPage() {
+  const [time, setTime] = useState("");
 
   useEffect(() => {
-    fetchData();
-    const iv = setInterval(fetchData, 30000);
-    return () => clearInterval(iv);
-  }, [fetchData]);
-
-  const statCards = [
-    {
-      label: "TOTAL",
-      value: stats.total,
-      icon: FileText,
-      sub: "All complaints",
-      accent: "text-slate-700",
-    },
-    {
-      label: "OPEN",
-      value: stats.open,
-      icon: AlertCircle,
-      sub: "Awaiting action",
-      accent: "text-amber-600",
-    },
-    {
-      label: "ASSIGNED",
-      value: stats.assigned,
-      icon: Users,
-      sub: "Under investigation",
-      accent: "text-blue-600",
-    },
-    {
-      label: "RESOLVED",
-      value: stats.resolved,
-      icon: CheckCircle,
-      sub: "Closed complaints",
-      accent: "text-emerald-600",
-    },
-    {
-      label: "CRITICAL",
-      value: stats.critical,
-      icon: AlertTriangle,
-      sub: "Action required",
-      accent: "text-red-600",
-    },
-  ];
+    const updateTime = () => {
+      const now = new Date();
+      setTime(
+        now.toLocaleString("en-IN", {
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+          hour: "numeric",
+          minute: "2-digit",
+          hour12: true,
+        }).replace(/, /g, '\n')
+      );
+    };
+    updateTime();
+    const interval = setInterval(updateTime, 60000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
-    <div className="p-4 md:p-6 lg:p-8">
-      <h1 className="mb-1 text-xl font-bold text-[#1B3A5C] md:text-2xl">
-        Real-time Grievance Analytics
-      </h1>
-      <p className="mb-4 text-xs text-slate-500 md:mb-6 md:text-sm">
-        Live overview of civic complaints across Delhi
-      </p>
-
-      {/* Error Display */}
-      {error && (
-        <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-4">
-          <div className="flex">
-            <div className="flex-shrink-0">
-              <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-              </svg>
-            </div>
-            <div className="ml-3">
-              <h3 className="text-sm font-medium text-red-800">Error</h3>
-              <div className="mt-2 text-sm text-red-700">
-                <p>{error}</p>
-                <button
-                  onClick={() => {
-                    setError(null);
-                    fetchData();
-                  }}
-                  className="mt-2 rounded bg-red-100 px-3 py-1 text-xs font-medium text-red-800 hover:bg-red-200"
-                >
-                  Retry
-                </button>
-              </div>
+    <div className="flex flex-col h-full overflow-hidden bg-[#F8FAFC] p-4 lg:p-5 font-sans text-[#0F172A] gap-4">
+      {/* 1. Header Section */}
+      <header className="shrink-0 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-extrabold tracking-tight text-[#0F172A]">
+            Good Morning, Chief Minister
+          </h1>
+          <p className="mt-1 text-xs font-medium text-[#64748B]">
+            Here's what's happening in Delhi today.
+          </p>
+        </div>
+        
+        <div className="flex items-center gap-4">
+          {/* Date & Time */}
+          <div className="flex items-center gap-3 rounded-xl bg-[#FFFFFF] px-4 py-2 shadow-sm border border-[#E8EDF5]">
+            <Calendar className="h-5 w-5 text-[#64748B]" />
+            <div className="flex flex-col leading-tight">
+              <span className="text-[13px] font-bold text-[#0F172A]">20 May 2025</span>
+              <span className="text-[12px] font-semibold text-[#64748B]">10:30 AM</span>
             </div>
           </div>
+          
+          {/* Profile */}
+          <div className="flex items-center gap-3 rounded-xl bg-[#FFFFFF] px-4 py-2 shadow-sm border border-[#E8EDF5] cursor-pointer hover:bg-slate-50 transition-colors">
+            <div className="relative">
+              <img
+                src="https://api.dicebear.com/7.x/notionists/svg?seed=Rekha&backgroundColor=E8EDF5"
+                alt="Avatar"
+                className="h-9 w-9 rounded-full object-cover border border-slate-200"
+              />
+              <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full bg-[#22C55E] border-2 border-white"></div>
+            </div>
+            <div className="flex flex-col leading-tight pr-2">
+              <span className="text-[13px] font-bold text-[#0F172A]">Smt. Rekha Gupta</span>
+              <span className="text-[11px] font-semibold text-[#64748B]">Chief Minister, Delhi</span>
+            </div>
+            <ChevronDown className="h-4 w-4 text-[#64748B]" />
+          </div>
         </div>
-      )}
+      </header>
 
-      {/* Stat cards */}
-      <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2 md:mb-8 md:gap-4 lg:grid-cols-5">
-        {statCards.map((c) => (
-          <Card
-            key={c.label}
-            className="border border-slate-200 bg-white shadow-sm"
-          >
-            <CardContent className="flex flex-col gap-1 p-5">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold tracking-wider text-slate-400">
-                  {c.label}
-                </span>
-                <c.icon className={`h-4 w-4 ${c.accent}`} />
+      {/* 2. Top Metric Cards (KPI) */}
+      <div className="shrink-0 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+        {/* Card 1 */}
+        <Card className="rounded-2xl border border-[#E8EDF5] shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] bg-[#FFFFFF]">
+          <CardContent className="p-3 flex flex-col justify-between h-full">
+            <div className="flex items-center gap-4 mb-3">
+              <div className="h-11 w-11 rounded-full bg-[#2563EB] flex items-center justify-center shrink-0 shadow-sm">
+                <ClipboardList className="h-5 w-5 text-white" />
               </div>
-              {loading ? (
-                <div className="h-8 w-16 animate-pulse rounded bg-slate-200" />
-              ) : (
-                <span className={`text-2xl font-bold ${c.accent}`}>
-                  {c.value}
-                </span>
-              )}
-              <span className="text-xs text-slate-400">{c.sub}</span>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      {/* Bottom — Table + Map side-by-side */}
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
-        {/* Recent Activity Table */}
-        <Card className="border border-slate-200 bg-white shadow-sm xl:col-span-2">
-          <CardHeader className="border-b border-slate-100 pb-3">
-            <CardTitle className="text-base font-semibold text-[#1B3A5C]">
-              Recent System Activity
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="overflow-x-auto p-0">
-            <Table>
-              <TableHeader>
-                <TableRow className="hover:bg-transparent">
-                  <TableHead className="text-xs">Complaint ID</TableHead>
-                  <TableHead className="text-xs">Subject</TableHead>
-                  <TableHead className="text-xs">Department</TableHead>
-                  <TableHead className="text-xs">Status</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {loading
-                  ? Array.from({ length: 5 }).map((_, i) => (
-                      <TableRow key={i}>
-                        {Array.from({ length: 4 }).map((_, j) => (
-                          <TableCell key={j}>
-                            <div className="h-4 w-20 animate-pulse rounded bg-slate-200" />
-                          </TableCell>
-                        ))}
-                      </TableRow>
-                    ))
-                  : recent.map((c) => (
-                      <TableRow
-                        key={c.id}
-                        className="hover:bg-slate-50/50"
-                      >
-                        <TableCell className="font-mono text-xs font-medium text-slate-700">
-                          {ticketId(c.id)}
-                        </TableCell>
-                        <TableCell className="max-w-[200px] truncate text-sm text-slate-600">
-                          {c.summary || "No summary"}
-                        </TableCell>
-                        <TableCell className="text-xs text-slate-500">
-                          {dept(c.category)}
-                        </TableCell>
-                        <TableCell>
-                          <Badge
-                            variant="outline"
-                            className={`text-xs capitalize ${
-                              STATUS_COLOR[
-                                (c.status as Status) || "open"
-                              ]
-                            }`}
-                          >
-                            {c.status || "open"}
-                          </Badge>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-              </TableBody>
-            </Table>
+              <div className="flex flex-col">
+                <p className="text-[10px] font-bold text-[#64748B] tracking-wide uppercase">TOTAL COMPLAINTS</p>
+                <h3 className="text-xl font-black text-[#0F172A] leading-none mt-1">12,487</h3>
+              </div>
+            </div>
+            <p className="text-[11px] font-bold text-[#22C55E] flex items-center gap-1 mt-auto">
+              ↑ 8.7% vs last 7 days
+            </p>
           </CardContent>
         </Card>
 
-        {/* Mini map — hidden on mobile */}
-        <Card className="hidden border border-slate-200 bg-white shadow-sm md:block">
-          <CardHeader className="border-b border-slate-100 pb-3">
-            <CardTitle className="text-base font-semibold text-[#1B3A5C]">
-              Geospatial Distribution
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="h-[400px] p-0">
-            <DashboardMap complaints={allComplaints} />
+        {/* Card 2 */}
+        <Card className="rounded-2xl border border-[#E8EDF5] shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] bg-[#FFFFFF]">
+          <CardContent className="p-3 flex flex-col justify-between h-full">
+            <div className="flex items-center gap-4 mb-3">
+              <div className="h-11 w-11 rounded-full bg-[#22C55E] flex items-center justify-center shrink-0 shadow-sm">
+                <CheckCircle className="h-5 w-5 text-white" />
+              </div>
+              <div className="flex flex-col">
+                <p className="text-[10px] font-bold text-[#64748B] tracking-wide uppercase">RESOLVED</p>
+                <h3 className="text-xl font-black text-[#0F172A] leading-none mt-1">9,842</h3>
+              </div>
+            </div>
+            <p className="text-[11px] font-bold text-[#22C55E] flex items-center gap-1 mt-auto">
+              ↑ 12.5% vs last 7 days
+            </p>
+          </CardContent>
+        </Card>
+
+        {/* Card 3 */}
+        <Card className="rounded-2xl border border-[#E8EDF5] shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] bg-[#FFFFFF]">
+          <CardContent className="p-3 flex flex-col justify-between h-full">
+            <div className="flex items-center gap-4 mb-3">
+              <div className="h-11 w-11 rounded-full bg-[#F59E0B] flex items-center justify-center shrink-0 shadow-sm">
+                <Hourglass className="h-5 w-5 text-white" />
+              </div>
+              <div className="flex flex-col">
+                <p className="text-[10px] font-bold text-[#64748B] tracking-wide uppercase">PENDING</p>
+                <h3 className="text-xl font-black text-[#0F172A] leading-none mt-1">2,645</h3>
+              </div>
+            </div>
+            <p className="text-[11px] font-bold text-[#EF4444] flex items-center gap-1 mt-auto">
+              ↓ 4.3% vs last 7 days
+            </p>
+          </CardContent>
+        </Card>
+
+        {/* Card 4 */}
+        <Card className="rounded-2xl border border-[#E8EDF5] shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] bg-[#FFFFFF]">
+          <CardContent className="p-3 flex flex-col justify-between h-full">
+            <div className="flex items-center gap-4 mb-3">
+              <div className="h-11 w-11 rounded-full bg-[#EF4444] flex items-center justify-center shrink-0 shadow-sm">
+                <AlertTriangle className="h-5 w-5 text-white" />
+              </div>
+              <div className="flex flex-col">
+                <p className="text-[10px] font-bold text-[#64748B] tracking-wide uppercase">CRITICAL CASES</p>
+                <h3 className="text-xl font-black text-[#0F172A] leading-none mt-1">312</h3>
+              </div>
+            </div>
+            <p className="text-[11px] font-bold text-[#EF4444] flex items-center gap-1 mt-auto">
+              ↑ 5.1% vs last 7 days
+            </p>
+          </CardContent>
+        </Card>
+
+        {/* Card 5 */}
+        <Card className="rounded-2xl border border-[#E8EDF5] shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] bg-[#FFFFFF]">
+          <CardContent className="p-3 flex flex-col justify-between h-full">
+            <div className="flex items-center gap-4 mb-3">
+              <div className="h-11 w-11 rounded-full bg-[#7C3AED] flex items-center justify-center shrink-0 shadow-sm">
+                <Shield className="h-5 w-5 text-white" />
+              </div>
+              <div className="flex flex-col">
+                <p className="text-[10px] font-bold text-[#64748B] tracking-wide uppercase">DELHI HEALTH SCORE</p>
+                <h3 className="text-xl font-black text-[#0F172A] leading-none mt-1">84 <span className="text-xs text-[#64748B] font-semibold">/100</span></h3>
+              </div>
+            </div>
+            <p className="text-[11px] font-bold text-[#22C55E] flex items-center gap-1.5 mt-auto">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#22C55E]"></span> Stable
+            </p>
+          </CardContent>
+        </Card>
+
+        {/* Card 6 */}
+        <Card className="rounded-2xl border border-[#E8EDF5] shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] bg-[#FFFFFF]">
+          <CardContent className="p-3 flex flex-col justify-between h-full">
+            <div className="flex items-center gap-4 mb-3">
+              <div className="h-11 w-11 rounded-full bg-[#14B8A6] flex items-center justify-center shrink-0 shadow-sm">
+                <Smile className="h-5 w-5 text-white" />
+              </div>
+              <div className="flex flex-col">
+                <p className="text-[10px] font-bold text-[#64748B] tracking-wide uppercase">CITIZEN SATISFACTION</p>
+                <h3 className="text-xl font-black text-[#0F172A] leading-none mt-1">87%</h3>
+              </div>
+            </div>
+            <p className="text-[11px] font-bold text-[#22C55E] flex items-center gap-1 mt-auto">
+              ↑ 4% vs last 7 days
+            </p>
           </CardContent>
         </Card>
       </div>
+
+      {/* 3. Main Content (65/35 Split) */}
+      <div className="flex-1 min-h-0 flex gap-4">
+        
+        {/* Left: DELHI HEAT MAP (65%) */}
+        <Card className="flex-[6.5] h-full overflow-hidden rounded-2xl border border-[#E8EDF5] shadow-[0_4px_20px_-8px_rgba(0,0,0,0.05)] bg-[#FFFFFF] flex flex-col">
+          <CardHeader className="flex flex-row items-start justify-between pb-2 pt-4 px-6 border-none shrink-0">
+            <div>
+              <CardTitle className="text-lg font-black text-[#0F172A] uppercase tracking-wide">
+                LIVE COMPLAINT MAP
+              </CardTitle>
+              <div className="flex items-center gap-1.5 mt-1">
+                <p className="text-[13px] font-medium text-[#64748B]">Complaint Density Across Districts</p>
+                <Info className="h-3.5 w-3.5 text-[#64748B] cursor-pointer" />
+              </div>
+              <div className="flex items-center gap-1.5 mt-0.5">
+                <MapPin className="h-3 w-3 text-[#64748B]" />
+                <p className="text-[11px] font-medium text-[#64748B]">Click on a district to view details</p>
+              </div>
+            </div>
+            <a href="#" className="flex items-center gap-1 text-[13px] font-bold text-[#2563EB] hover:text-blue-800 transition-colors">
+              View All Districts <ArrowUpRight className="h-3.5 w-3.5" />
+            </a>
+          </CardHeader>
+          <CardContent className="p-0 flex-1 relative mt-4">
+            
+            {/* Legend */}
+            <div className="absolute left-6 bottom-4 flex flex-row gap-4 z-10 bg-white/90 backdrop-blur-sm p-2 rounded-lg border border-slate-200 shadow-sm">
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 bg-[#EF4444] rounded-[2px]"></div>
+                <span className="text-[10px] font-bold text-[#0F172A]">High (500+)</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 bg-[#F59E0B] rounded-[2px]"></div>
+                <span className="text-[10px] font-bold text-[#0F172A]">Medium (200–500)</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 bg-[#FBBF24] rounded-[2px]"></div>
+                <span className="text-[10px] font-bold text-[#0F172A]">Low (50–200)</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 bg-[#22C55E] rounded-[2px]"></div>
+                <span className="text-[10px] font-bold text-[#0F172A]">Very Low (0–50)</span>
+              </div>
+            </div>
+
+            <div className="absolute inset-0 w-full h-full overflow-hidden rounded-bl-2xl rounded-br-2xl">
+              <Map
+                initialViewState={{
+                  longitude: 77.1025,
+                  latitude: 28.7041,
+                  zoom: 10
+                }}
+                mapStyle="https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"
+                style={{ width: '100%', height: '100%' }}
+              >
+                <Source id="delhi-boundary" type="geojson" data={delhiBoundaryData as any}>
+                  <Layer
+                    id="boundary-layer"
+                    type="line"
+                    paint={{
+                      "line-color": "#64748B",
+                      "line-width": 1.5,
+                      "line-opacity": 0.8
+                    }}
+                  />
+                </Source>
+
+                <Source id="complaints" type="geojson" data={complaintPointsData as any}>
+                  <Layer
+                    id="complaints-layer"
+                    type="circle"
+                    paint={{
+                      "circle-radius": 6,
+                      "circle-color": [
+                        "match",
+                        ["get", "priority"],
+                        "high", "#EF4444",
+                        "medium", "#F59E0B",
+                        "low", "#22C55E",
+                        "#64748B"
+                      ],
+                      "circle-opacity": 0.8,
+                      "circle-stroke-width": 1,
+                      "circle-stroke-color": "#ffffff"
+                    }}
+                  />
+                </Source>
+                
+                <NavigationControl position="bottom-right" />
+              </Map>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Right: ACTION REQUIRED TODAY (35%) */}
+        <Card className="flex-[3.5] h-full overflow-hidden rounded-2xl border border-[#E8EDF5] shadow-[0_4px_20px_-8px_rgba(0,0,0,0.05)] bg-[#FFFFFF] flex flex-col p-4">
+          <CardHeader className="flex flex-row items-center justify-between p-0 pb-2 border-none shrink-0">
+            <CardTitle className="text-lg font-black text-[#0F172A] uppercase tracking-wide">
+              ACTION REQUIRED TODAY
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-0 flex-1 flex flex-col overflow-hidden">
+            <div className="flex-1 flex flex-col overflow-hidden gap-2">
+              
+              {/* Alert 1 */}
+              <div className="flex items-center bg-[#FEF2F2] rounded-xl px-3 py-1.5 transition-transform hover:-translate-y-0.5 border border-[#FEE2E2]/50 shrink-0">
+                <div className="h-9 w-9 shrink-0 rounded-full bg-[#EF4444] flex items-center justify-center mr-3 shadow-sm shadow-red-200">
+                  <Droplet className="h-4 w-4 text-white" fill="currentColor" />
+                </div>
+                <div className="flex-1 min-w-0 mr-2">
+                  <p className="text-[13px] font-bold text-[#0F172A] truncate leading-snug">Water Crisis in North-East Delhi</p>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    <p className="text-[11px] font-semibold text-[#64748B] truncate">482 complaints reported</p>
+                    <Badge className="bg-[#FEE2E2] text-[#EF4444] hover:bg-[#FEE2E2] shadow-none border-none font-bold rounded px-1.5 py-0 leading-none h-4 text-[9px]">Critical</Badge>
+                  </div>
+                </div>
+                <button className="text-[11px] font-bold text-[#0F172A] border border-[#E8EDF5] bg-white rounded-lg px-2.5 py-1.5 hover:bg-slate-50 transition-all shadow-sm flex items-center gap-1 shrink-0">
+                  Take Action <ChevronDown className="h-3 w-3 -rotate-90 text-[#64748B]" />
+                </button>
+              </div>
+              
+              {/* Alert 2 */}
+              <div className="flex items-center bg-[#FFFBEB] rounded-xl px-3 py-1.5 transition-transform hover:-translate-y-0.5 border border-[#FEF3C7]/50 shrink-0">
+                <div className="h-9 w-9 shrink-0 rounded-full bg-[#F59E0B] flex items-center justify-center mr-3 shadow-sm shadow-orange-200">
+                  <Zap className="h-4 w-4 text-white" fill="currentColor" />
+                </div>
+                <div className="flex-1 min-w-0 mr-2">
+                  <p className="text-[13px] font-bold text-[#0F172A] truncate leading-snug">Power Outage Incidents</p>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    <p className="text-[11px] font-semibold text-[#64748B] truncate">18 incidents unresolved</p>
+                    <Badge className="bg-[#FEF3C7] text-[#F59E0B] hover:bg-[#FEF3C7] shadow-none border-none font-bold rounded px-1.5 py-0 leading-none h-4 text-[9px]">High</Badge>
+                  </div>
+                </div>
+                <button className="text-[11px] font-bold text-[#0F172A] border border-[#E8EDF5] bg-white rounded-lg px-2.5 py-1.5 hover:bg-slate-50 transition-all shadow-sm flex items-center gap-1 shrink-0">
+                  Take Action <ChevronDown className="h-3 w-3 -rotate-90 text-[#64748B]" />
+                </button>
+              </div>
+
+              {/* Alert 3 */}
+              <div className="flex items-center bg-[#FFFBEB] rounded-xl px-3 py-1.5 transition-transform hover:-translate-y-0.5 border border-[#FEF3C7]/50 shrink-0">
+                <div className="h-9 w-9 shrink-0 rounded-full bg-[#F59E0B] flex items-center justify-center mr-3 shadow-sm shadow-orange-200">
+                  <HardHat className="h-4 w-4 text-white" />
+                </div>
+                <div className="flex-1 min-w-0 mr-2">
+                  <p className="text-[13px] font-bold text-[#0F172A] truncate leading-snug">Roads Department Backlog</p>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    <p className="text-[11px] font-semibold text-[#64748B] truncate">147 cases pending &gt; 7 days</p>
+                    <Badge className="bg-[#FEF3C7] text-[#F59E0B] hover:bg-[#FEF3C7] shadow-none border-none font-bold rounded px-1.5 py-0 leading-none h-4 text-[9px]">High</Badge>
+                  </div>
+                </div>
+                <button className="text-[11px] font-bold text-[#0F172A] border border-[#E8EDF5] bg-white rounded-lg px-2.5 py-1.5 hover:bg-slate-50 transition-all shadow-sm flex items-center gap-1 shrink-0">
+                  Take Action <ChevronDown className="h-3 w-3 -rotate-90 text-[#64748B]" />
+                </button>
+              </div>
+
+              {/* Alert 4 */}
+              <div className="flex items-center bg-[#F5F3FF] rounded-xl px-3 py-1.5 transition-transform hover:-translate-y-0.5 border border-[#EDE9FE]/50 shrink-0">
+                <div className="h-9 w-9 shrink-0 rounded-full bg-[#7C3AED] flex items-center justify-center mr-3 shadow-sm shadow-purple-200">
+                  <Users className="h-4 w-4 text-white" fill="currentColor" />
+                </div>
+                <div className="flex-1 min-w-0 mr-2">
+                  <p className="text-[13px] font-bold text-[#0F172A] truncate leading-snug">VIP / High Escalation Cases</p>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    <p className="text-[11px] font-semibold text-[#64748B] truncate">6 cases require immediate attention</p>
+                    <Badge className="bg-[#EDE9FE] text-[#7C3AED] hover:bg-[#EDE9FE] shadow-none border-none font-bold rounded px-1.5 py-0 leading-none h-4 text-[9px]">Medium</Badge>
+                  </div>
+                </div>
+                <button className="text-[11px] font-bold text-[#0F172A] border border-[#E8EDF5] bg-white rounded-lg px-2.5 py-1.5 hover:bg-slate-50 transition-all shadow-sm flex items-center gap-1 shrink-0">
+                  Take Action <ChevronDown className="h-3 w-3 -rotate-90 text-[#64748B]" />
+                </button>
+              </div>
+
+            </div>
+            <div className="mt-3 shrink-0">
+              <a href="#" className="w-full py-3.5 bg-[#EFF6FF] rounded-xl flex items-center justify-center gap-2 hover:bg-[#DBEAFE] transition-colors text-[13px] font-bold text-[#2563EB]">
+                View All Urgent Issues <ArrowRight className="h-4 w-4" />
+              </a>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* 4. AI INSIGHTS */}
+      <div className="shrink-0 flex flex-col gap-2">
+        <div className="flex items-center justify-between px-2">
+          <div className="flex items-center gap-3">
+            <h2 className="text-lg font-black text-[#0F172A] tracking-wide">AI INSIGHTS</h2>
+            <div className="flex items-center gap-1.5 text-[12px] font-semibold text-[#64748B]">
+              Powered by <span className="text-[#2563EB] font-bold flex items-center gap-1"><Sparkles className="h-3.5 w-3.5" /> Gemini</span>
+            </div>
+          </div>
+          <a href="#" className="flex items-center gap-1 text-[13px] font-bold text-[#2563EB] hover:text-blue-800 transition-colors">
+            View All Insights <ArrowRight className="h-3.5 w-3.5" />
+          </a>
+        </div>
+        
+        <Card className="rounded-2xl border border-[#E8EDF5] shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] bg-[#FFFFFF] overflow-hidden">
+          <CardContent className="p-0 flex flex-row divide-x divide-gray-200">
+            
+            <div className="flex-1 p-4 flex items-start gap-3 hover:bg-slate-50 transition-colors">
+              <div className="bg-[#FEF2F2] p-2 rounded-lg shrink-0">
+                <TrendingUp className="h-4 w-4 text-[#EF4444]" />
+              </div>
+              <p className="text-[11px] text-[#64748B] leading-tight font-medium">
+                Water complaints increased by <strong className="text-[#EF4444]">28%</strong> in North-East Delhi compared to last week.
+              </p>
+            </div>
+
+            <div className="flex-1 p-4 flex items-start gap-3 hover:bg-slate-50 transition-colors">
+              <div className="bg-[#EFF6FF] p-2 rounded-lg shrink-0">
+                <Droplet className="h-4 w-4 text-[#2563EB]" fill="currentColor" />
+              </div>
+              <p className="text-[11px] text-[#64748B] leading-tight font-medium">
+                Water supply issues are the highest concern today (<strong className="text-[#0F172A]">37%</strong> of total complaints).
+              </p>
+            </div>
+
+            <div className="flex-1 p-4 flex items-start gap-3 hover:bg-slate-50 transition-colors">
+              <div className="bg-[#F8FAFC] p-2 rounded-lg shrink-0">
+                <Road className="h-4 w-4 text-[#0F172A]" />
+              </div>
+              <p className="text-[11px] text-[#64748B] leading-tight font-medium">
+                Roads Department has the highest unresolved backlog (<strong className="text-[#0F172A]">147 cases &gt; 7 days</strong>).
+              </p>
+            </div>
+
+            <div className="flex-1 p-4 flex items-start gap-3 hover:bg-slate-50 transition-colors">
+              <div className="bg-[#FFFBEB] p-2 rounded-lg shrink-0">
+                <Zap className="h-4 w-4 text-[#F59E0B]" fill="currentColor" />
+              </div>
+              <p className="text-[11px] text-[#64748B] leading-tight font-medium">
+                Power outage complaints reduced by <strong className="text-[#22C55E]">15%</strong> compared to last week.
+              </p>
+            </div>
+
+            <div className="flex-1 p-4 flex items-start gap-3 hover:bg-slate-50 transition-colors">
+              <div className="bg-[#F5F3FF] p-2 rounded-lg shrink-0">
+                <Users className="h-4 w-4 text-[#7C3AED]" fill="currentColor" />
+              </div>
+              <p className="text-[11px] text-[#64748B] leading-tight font-medium">
+                Women safety complaints increased by <strong className="text-[#0F172A]">12%</strong> in last 7 days.
+              </p>
+            </div>
+
+          </CardContent>
+        </Card>
+      </div>
+      
     </div>
   );
 }

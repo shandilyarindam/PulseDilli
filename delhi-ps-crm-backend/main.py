@@ -1,4 +1,4 @@
-"""Delhi PS-CRM FastAPI application entry point."""
+"""Jan Samadhan FastAPI application entry point."""
 
 import json
 import logging
@@ -76,7 +76,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 
 
 app = FastAPI(
-    title="Delhi PS-CRM",
+    title="Jan Samadhan",
     description="WhatsApp-based civic complaint management system for Delhi. "
     "Uses Gemini AI for classification, Supabase for storage, "
     "and ML-based auto-escalation.",
@@ -134,7 +134,7 @@ async def global_exception_handler(request: Request, exc: Exception):
 @app.get("/")
 def root() -> dict[str, str]:
     """Return basic application status."""
-    return {"status": "Delhi PS-CRM Backend Running"}
+    return {"status": "Jan Samadhan Backend Running"}
 
 
 @app.get("/health")

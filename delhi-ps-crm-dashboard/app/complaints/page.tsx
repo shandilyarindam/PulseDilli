@@ -129,7 +129,7 @@ export default function ComplaintsPage() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `Delhi_PS_CRM_Complaints_${new Date().toISOString().slice(0, 10)}.csv`;
+    a.download = `Jan_Samadhan_Complaints_${new Date().toISOString().slice(0, 10)}.csv`;
     a.click();
     URL.revokeObjectURL(url);
   }
@@ -139,7 +139,7 @@ export default function ComplaintsPage() {
       label: "Total Grievances",
       value: total,
       icon: FileText,
-      accent: "text-[#1B3A5C]",
+      accent: "text-[var(--brand)]",
     },
     {
       label: "Under Investigation",
@@ -159,10 +159,10 @@ export default function ComplaintsPage() {
     <div className="p-4 md:p-6 lg:p-8">
       <div className="mb-1 flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-xl font-bold text-[#1B3A5C] md:text-2xl">
+          <h1 className="text-xl font-bold text-[var(--brand)] dark:text-white md:text-2xl">
             Citizen Grievances
           </h1>
-          <p className="text-xs text-slate-500 md:text-sm">
+          <p className="text-xs text-[var(--text-secondary)] md:text-sm">
             Grievance Registry
           </p>
         </div>
@@ -171,16 +171,16 @@ export default function ComplaintsPage() {
         <div className="flex items-center gap-3">
           <button
             onClick={exportCSV}
-            className="flex items-center gap-2.5 rounded-lg border border-slate-200 bg-white px-4 py-2.5 shadow-[0_1px_3px_rgba(0,0,0,0.08)] transition-all hover:border-slate-300 hover:shadow-md"
+            className="flex items-center gap-2.5 rounded-lg border border-[var(--border-color)] bg-[var(--surface)] px-4 py-2.5 shadow-[0_1px_3px_rgba(0,0,0,0.08)] transition-all hover:border-slate-300 hover:shadow-md"
           >
-            <div className="flex h-8 w-8 items-center justify-center rounded-md bg-[#1B3A5C]/5">
-              <Download className="h-4 w-4 text-[#1B3A5C]" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-md bg-[var(--brand)]/5">
+              <Download className="h-4 w-4 text-[var(--brand)]" />
             </div>
             <div className="text-left">
-              <p className="text-sm font-semibold text-[#1B3A5C]">
+              <p className="text-sm font-semibold text-[var(--brand)]">
                 Export Registry
               </p>
-              <p className="text-[10px] text-slate-400">Available as CSV</p>
+              <p className="text-[10px] text-[var(--text-muted)]">Available as CSV</p>
             </div>
           </button>
         </div>
@@ -191,23 +191,23 @@ export default function ComplaintsPage() {
         {statCards.map((c) => (
           <Card
             key={c.label}
-            className="border border-slate-200 bg-white shadow-[0_1px_3px_rgba(0,0,0,0.08)]"
+            className="border border-[var(--border-color)] bg-[var(--surface)] shadow-[0_1px_3px_rgba(0,0,0,0.08)]"
           >
             <CardContent className="flex items-center gap-4 p-5">
               <div
-                className={`flex h-10 w-10 items-center justify-center rounded-lg bg-slate-100 ${c.accent}`}
+                className={`flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--stat-bg)] ${c.accent}`}
               >
                 <c.icon className="h-5 w-5" />
               </div>
               <div>
                 {loading ? (
-                  <div className="h-7 w-12 animate-pulse rounded bg-slate-200" />
+                  <div className="h-7 w-12 animate-pulse rounded bg-[var(--skeleton)]" />
                 ) : (
                   <span className={`text-2xl font-bold ${c.accent}`}>
                     {c.value}
                   </span>
                 )}
-                <p className="text-xs text-slate-500">{c.label}</p>
+                <p className="text-xs text-[var(--text-secondary)]">{c.label}</p>
               </div>
             </CardContent>
           </Card>
@@ -220,7 +220,7 @@ export default function ComplaintsPage() {
           value={catFilter}
           onValueChange={(v) => setCatFilter(v ?? "all")}
         >
-          <SelectTrigger className="w-48 bg-white">
+          <SelectTrigger className="w-48 bg-[var(--surface)]">
             <SelectValue placeholder="All Categories" />
           </SelectTrigger>
           <SelectContent>
@@ -237,7 +237,7 @@ export default function ComplaintsPage() {
           value={statusFilter}
           onValueChange={(v) => setStatusFilter(v ?? "all")}
         >
-          <SelectTrigger className="w-40 bg-white">
+          <SelectTrigger className="w-40 bg-[var(--surface)]">
             <SelectValue placeholder="All Statuses" />
           </SelectTrigger>
           <SelectContent>
@@ -251,7 +251,7 @@ export default function ComplaintsPage() {
       </div>
 
       {/* Table */}
-      <Card className="border border-slate-200 bg-white shadow-[0_1px_3px_rgba(0,0,0,0.08)]">
+      <Card className="border border-[var(--border-color)] bg-[var(--surface)] shadow-[0_1px_3px_rgba(0,0,0,0.08)]">
         <CardContent className="overflow-x-auto p-0">
           <Table>
             <TableHeader>
@@ -273,28 +273,28 @@ export default function ComplaintsPage() {
                     <TableRow key={i}>
                       {Array.from({ length: 7 }).map((_, j) => (
                         <TableCell key={j}>
-                          <div className="h-4 w-20 animate-pulse rounded bg-slate-200" />
+                          <div className="h-4 w-20 animate-pulse rounded bg-[var(--skeleton)]" />
                         </TableCell>
                       ))}
                     </TableRow>
                   ))
                 : filtered.map((c) => (
-                    <TableRow key={c.id} className="hover:bg-slate-50/50">
-                      <TableCell className="font-mono text-xs font-medium text-slate-700">
+                    <TableRow key={c.id} className="hover:bg-[var(--surface-elevated)]/50">
+                      <TableCell className="font-mono text-xs font-medium text-[var(--text-primary)]">
                         {ticketId(c.id)}
                       </TableCell>
                       <TableCell className="max-w-[280px]">
-                        <p className="truncate text-sm text-slate-700">
+                        <p className="truncate text-sm text-[var(--text-primary)]">
                           {c.summary || "No summary"}
                         </p>
                         <Badge
                           variant="outline"
-                          className="mt-1 text-[10px] text-slate-500"
+                          className="mt-1 text-[10px] text-[var(--text-secondary)]"
                         >
                           {c.category || "Uncategorized"}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-xs text-slate-500">
+                      <TableCell className="text-xs text-[var(--text-secondary)]">
                         {dept(c.category)}
                       </TableCell>
                       <TableCell>
@@ -319,13 +319,13 @@ export default function ComplaintsPage() {
                           {c.status || "open"}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-xs text-slate-500">
+                      <TableCell className="text-xs text-[var(--text-secondary)]">
                         {c.timestamp ? fmtDate(c.timestamp) : "-"}
                       </TableCell>
                       <TableCell>
                         <button
                           onClick={() => openManageModal(c)}
-                          className="rounded-md p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
+                          className="rounded-md p-1.5 text-[var(--text-muted)] transition-colors hover:bg-[var(--stat-bg)] hover:text-[var(--text-secondary)]"
                         >
                           <MoreHorizontal className="h-4 w-4" />
                         </button>
@@ -335,7 +335,7 @@ export default function ComplaintsPage() {
             </TableBody>
           </Table>
           {!loading && filtered.length === 0 && (
-            <div className="py-12 text-center text-sm text-slate-400">
+            <div className="py-12 text-center text-sm text-[var(--text-muted)]">
               No complaints match the selected filters
             </div>
           )}

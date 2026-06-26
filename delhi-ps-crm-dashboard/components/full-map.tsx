@@ -1,6 +1,6 @@
 "use client";
 
-import { MapContainer, TileLayer, CircleMarker, Popup } from "react-leaflet";
+import { MapContainer, TileLayer, CircleMarker, Popup, GeoJSON, Marker, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 
 interface Complaint {
@@ -16,9 +16,14 @@ interface Complaint {
   photo_url: string | null;
 }
 
+import { useEffect, useState } from "react";
 interface Props {
   complaints: Complaint[];
   onSelect: (c: Complaint) => void;
+  wards?: GeoJSON.FeatureCollection;
+  incidents?: { lat: number; lng: number; type?: string }[];
+  showWards?: boolean;
+  showIncidents?: boolean;
 }
 
 const URGENCY_CLR: Record<string, string> = {
@@ -46,7 +51,7 @@ function parseLatLng(loc: string | null): [number, number] | null {
   return null;
 }
 
-export default function FullMap({ complaints, onSelect }: Props) {
+export default function FullMap({ complaints, onSelect, wards, incidents, showWards, showIncidents }: Props) {
   const markers = complaints
     .map((c) => ({ ...c, latlng: parseLatLng(c.location) }))
     .filter((c) => c.latlng !== null);
@@ -62,31 +67,40 @@ export default function FullMap({ complaints, onSelect }: Props) {
         attribution='&copy; <a href="https://www.openstreetmap.org/">OSM</a>'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
-      {markers.map((m) => {
-        const clr = URGENCY_CLR[m.urgency || "Low"] || "#22c55e";
-        return (
-          <CircleMarker
-            key={m.id}
-            center={m.latlng!}
-            radius={7}
-            pathOptions={{
-              color: clr,
-              fillColor: clr,
-              fillOpacity: 0.8,
-              weight: 2,
-            }}
-            eventHandlers={{
-              click: () => onSelect(m),
-            }}
-          >
-            <Popup>
-              <p className="text-xs font-semibold">
-                {m.summary || "No summary"}
-              </p>
-            </Popup>
-          </CircleMarker>
-        );
-      })}
+
+
+  // Render ward boundaries if enabled
+  {showWards && wards && (
+    <GeoJSON
+      data={wards}
+      style={(feature) => {
+        const score = feature?.properties?.healthScore ?? 0;
+        let fillColor = '#10b981'; // green default (healthy)
+        if (score <= 40) fillColor = '#ef4444'; // red critical
+        else if (score <= 60) fillColor = '#f97316'; // orange concern
+        else if (score <= 80) fillColor = '#facc15'; // yellow watchlist
+        return { color: '#000', weight: 1, fillColor, fillOpacity: 0.4 };
+      }}
+      onEachFeature={(feature, layer) => {
+        const name = feature.properties?.wardId ?? 'Ward';
+        const score = feature?.properties?.healthScore ?? 0;
+        layer.bindPopup(`${name}<br/>Health Score: ${score}`);
+        layer.on('click', () => {
+          const map = (layer as any)._map;
+          // Retrieve bounds if available (Polygon/Polyline)
+          const bounds = (layer as any).getBounds?.();
+          if (bounds && map) {
+            map.fitBounds(bounds);
+          }
+        });
+      }}
+    />
+  )}
+
+  // Render CCTV/incident markers if enabled
+  {showIncidents && incidents && incidents.map((inc, idx) => (
+    <Marker key={idx} position={[inc.lat, inc.lng]} />
+  ))}
     </MapContainer>
   );
 }

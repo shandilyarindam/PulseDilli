@@ -169,48 +169,48 @@ export default function AnalyticsPage() {
   return (
     <div className="p-4 md:p-6 lg:p-8">
       <div className="mb-1">
-        <h1 className="text-xl font-bold text-[#1B3A5C] md:text-2xl">
+        <h1 className="text-xl font-bold text-[var(--brand)] dark:text-white md:text-2xl">
           Analytics
         </h1>
       </div>
-      <p className="mb-4 text-xs text-slate-500 md:mb-6 md:text-sm">
+      <p className="mb-4 text-xs text-[var(--text-secondary)] md:mb-6 md:text-sm">
         Comprehensive analytics and performance metrics
       </p>
 
       {/* Top metrics */}
       <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2 md:mb-8 md:gap-4">
-        <Card className="border border-slate-200 bg-white shadow-sm">
+        <Card className="border border-[var(--border-color)] bg-[var(--surface)] shadow-sm">
           <CardContent className="flex items-center gap-4 p-5">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-100 text-[#1B3A5C]">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--stat-bg)] text-[var(--brand)]">
               <FileText className="h-5 w-5" />
             </div>
             <div>
               {loading ? (
-                <div className="h-7 w-12 animate-pulse rounded bg-slate-200" />
+                <div className="h-7 w-12 animate-pulse rounded bg-[var(--skeleton)]" />
               ) : (
-                <span className="text-2xl font-bold text-[#1B3A5C]">
+                <span className="text-2xl font-bold text-[var(--brand)]">
                   {total}
                 </span>
               )}
-              <p className="text-xs text-slate-500">Total Reports</p>
+              <p className="text-xs text-[var(--text-secondary)]">Total Reports</p>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="border border-slate-200 bg-white shadow-sm">
+        <Card className="border border-[var(--border-color)] bg-[var(--surface)] shadow-sm">
           <CardContent className="flex items-center gap-4 p-5">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
               <Zap className="h-5 w-5" />
             </div>
             <div>
               {loading ? (
-                <div className="h-7 w-12 animate-pulse rounded bg-slate-200" />
+                <div className="h-7 w-12 animate-pulse rounded bg-[var(--skeleton)]" />
               ) : (
                 <span className="text-2xl font-bold text-blue-600">
                   {avgResponse.toFixed(1)}m
                 </span>
               )}
-              <p className="text-xs text-slate-500">Response Velocity</p>
+              <p className="text-xs text-[var(--text-secondary)]">Response Velocity</p>
             </div>
           </CardContent>
         </Card>
@@ -219,9 +219,9 @@ export default function AnalyticsPage() {
       {/* Charts grid */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {/* Incidence Velocity */}
-        <Card className="border border-slate-200 bg-white shadow-sm">
-          <CardHeader className="border-b border-slate-100 pb-3">
-            <CardTitle className="text-sm font-semibold text-[#1B3A5C]">
+        <Card className="border border-[var(--border-color)] bg-[var(--surface)] shadow-sm">
+          <CardHeader className="border-b border-[var(--border-subtle)] pb-3">
+            <CardTitle className="text-sm font-semibold text-[var(--brand)] dark:text-white">
               Incidence Velocity (14 days)
             </CardTitle>
           </CardHeader>
@@ -245,9 +245,9 @@ export default function AnalyticsPage() {
         </Card>
 
         {/* Urgency Distribution */}
-        <Card className="border border-slate-200 bg-white shadow-sm">
-          <CardHeader className="border-b border-slate-100 pb-3">
-            <CardTitle className="text-sm font-semibold text-[#1B3A5C]">
+        <Card className="border border-[var(--border-color)] bg-[var(--surface)] shadow-sm">
+          <CardHeader className="border-b border-[var(--border-subtle)] pb-3">
+            <CardTitle className="text-sm font-semibold text-[var(--brand)] dark:text-white">
               Urgency Distribution
             </CardTitle>
           </CardHeader>
@@ -272,9 +272,9 @@ export default function AnalyticsPage() {
         </Card>
 
         {/* Category Breakdown */}
-        <Card className="border border-slate-200 bg-white shadow-sm">
-          <CardHeader className="border-b border-slate-100 pb-3">
-            <CardTitle className="text-sm font-semibold text-[#1B3A5C]">
+        <Card className="border border-[var(--border-color)] bg-[var(--surface)] shadow-sm">
+          <CardHeader className="border-b border-[var(--border-subtle)] pb-3">
+            <CardTitle className="text-sm font-semibold text-[var(--brand)] dark:text-white">
               Category Breakdown
             </CardTitle>
           </CardHeader>
@@ -307,9 +307,9 @@ export default function AnalyticsPage() {
         </Card>
 
         {/* Resolution Rate */}
-        <Card className="border border-slate-200 bg-white shadow-sm">
-          <CardHeader className="border-b border-slate-100 pb-3">
-            <CardTitle className="text-sm font-semibold text-[#1B3A5C]">
+        <Card className="border border-[var(--border-color)] bg-[var(--surface)] shadow-sm">
+          <CardHeader className="border-b border-[var(--border-subtle)] pb-3">
+            <CardTitle className="text-sm font-semibold text-[var(--brand)] dark:text-white">
               Resolution Rate Over Time
             </CardTitle>
           </CardHeader>

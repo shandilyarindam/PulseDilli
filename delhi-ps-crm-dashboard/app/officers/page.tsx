@@ -45,10 +45,10 @@ function initials(name: string): string {
 
 function urgencyBadgeColor(u: string | null): string {
   const v = (u || "").split("(")[0].trim();
-  if (v === "Critical") return "bg-red-500 text-white";
-  if (v === "High") return "bg-orange-500 text-white";
-  if (v === "Medium") return "bg-yellow-500 text-white";
-  return "bg-slate-200 text-slate-600";
+  if (v === "Critical") return "bg-red-500 text-[var(--btn-primary-fg)]";
+  if (v === "High") return "bg-orange-500 text-[var(--btn-primary-fg)]";
+  if (v === "Medium") return "bg-yellow-500 text-[var(--btn-primary-fg)]";
+  return "bg-[var(--skeleton)] text-[var(--text-secondary)]";
 }
 
 function urgencyLabel(u: string | null): string {
@@ -174,49 +174,38 @@ export default function OfficersPage() {
     ? allResTimes.reduce((a, b) => a + b, 0) / allResTimes.length
     : 0;
 
-  /* ── Timeline entries ────────────────────────────────── */
-  const timelineEntries = allComplaints
-    .filter((c) => c.assigned_to && (c.assigned_at || c.resolved_at))
-    .slice(0, 50)
-    .flatMap((c) => {
-      const entries: { type: "assigned" | "resolved"; complaint: RawComplaint; time: string }[] = [];
-      if (c.assigned_at) entries.push({ type: "assigned", complaint: c, time: c.assigned_at });
-      if (c.status === "resolved" && c.resolved_at) entries.push({ type: "resolved", complaint: c, time: c.resolved_at });
-      return entries;
-    })
-    .sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime())
-    .slice(0, 50);
+
 
   const metricCards = [
-    { label: "Total Officers", value: totalOfficers.toString(), icon: Users, accent: "text-[#1B3A5C]" },
+    { label: "Total Officers", value: totalOfficers.toString(), icon: Users, accent: "text-[var(--brand)]" },
     { label: "Active Field Load", value: `${activeFieldPct}%`, icon: Activity, accent: "text-blue-600" },
     { label: "Avg Response", value: `${avgResponseMin.toFixed(1)}m`, icon: Zap, accent: "text-emerald-600" },
   ];
 
   return (
     <div className="p-4 md:p-6 lg:p-8">
-      <h1 className="mb-1 text-xl font-bold text-[#1B3A5C] md:text-2xl">
+      <h1 className="mb-1 text-xl font-bold text-[var(--brand)] dark:text-white md:text-2xl">
         Officer Accountability
       </h1>
-      <p className="mb-4 text-xs text-slate-500 md:mb-6 md:text-sm">
+      <p className="mb-4 text-xs text-[var(--text-secondary)] md:mb-6 md:text-sm">
         Performance tracking, activity feed, and complaint assignments
       </p>
 
       {/* ── Metric cards ────────────────────────────────── */}
       <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-3 md:mb-6 md:gap-4">
         {metricCards.map((c) => (
-          <Card key={c.label} className="border border-slate-200 bg-white shadow-sm">
+          <Card key={c.label} className="border border-[var(--border-color)] bg-[var(--surface)] shadow-sm">
             <CardContent className="flex items-center gap-4 p-5">
-              <div className={`flex h-10 w-10 items-center justify-center rounded-lg bg-slate-100 ${c.accent}`}>
+              <div className={`flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--stat-bg)] ${c.accent}`}>
                 <c.icon className="h-5 w-5" />
               </div>
               <div>
                 {loading ? (
-                  <div className="h-7 w-12 animate-pulse rounded bg-slate-200" />
+                  <div className="h-7 w-12 animate-pulse rounded bg-[var(--skeleton)]" />
                 ) : (
                   <span className={`text-2xl font-bold ${c.accent}`}>{c.value}</span>
                 )}
-                <p className="text-xs text-slate-500">{c.label}</p>
+                <p className="text-xs text-[var(--text-secondary)]">{c.label}</p>
               </div>
             </CardContent>
           </Card>
@@ -224,18 +213,18 @@ export default function OfficersPage() {
       </div>
 
       {/* ── Section 1: Officer Performance Overview ──── */}
-      <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-slate-400">
+      <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-[var(--text-muted)]">
         Officer Performance Overview
       </h2>
 
       {loading ? (
-        <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="grid min-h-[50vh] grid-cols-1 gap-4 pb-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="h-48 animate-pulse rounded-lg bg-slate-200" />
+            <div key={i} className="h-48 animate-pulse rounded-lg bg-[var(--skeleton)]" />
           ))}
         </div>
       ) : (
-        <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="grid min-h-[50vh] grid-cols-1 gap-4 pb-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {officers.map((o) => {
             const statusDot = o.resolvedThisWeek
               ? "bg-emerald-400"
@@ -246,21 +235,21 @@ export default function OfficersPage() {
             return (
               <Card
                 key={`${o.department}-${o.name}`}
-                className="cursor-pointer border border-slate-200 bg-white shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5"
+                className="cursor-pointer border border-[var(--border-color)] bg-[var(--surface)] shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5"
                 onClick={() => setDrawerOfficer(o)}
               >
                 <CardContent className="p-4">
                   {/* Header row */}
                   <div className="mb-3 flex items-center gap-3">
-                    <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white ${DEPT_COLORS[o.department] || "bg-slate-500"}`}>
+                    <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-bold text-[var(--btn-primary-fg)] ${DEPT_COLORS[o.department] || "bg-[var(--surface-elevated)]0"}`}>
                       {initials(o.name)}
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
-                        <span className="truncate text-sm font-semibold text-slate-800">{o.name}</span>
+                        <span className="truncate text-sm font-semibold text-[var(--text-primary)]">{o.name}</span>
                         <span className={`inline-block h-2 w-2 shrink-0 rounded-full ${statusDot}`} />
                       </div>
-                      <Badge variant="outline" className="mt-0.5 text-[10px] text-slate-500">{o.department}</Badge>
+                      <Badge variant="outline" className="mt-0.5 text-[10px] text-[var(--text-secondary)]">{o.department}</Badge>
                     </div>
                   </div>
 
@@ -268,28 +257,28 @@ export default function OfficersPage() {
                   <div className="mb-3 grid grid-cols-3 gap-2 text-center">
                     <div>
                       <span className="block text-lg font-bold text-blue-600">{o.assigned}</span>
-                      <span className="text-[10px] text-slate-400">Assigned</span>
+                      <span className="text-[10px] text-[var(--text-muted)]">Assigned</span>
                     </div>
                     <div>
                       <span className="block text-lg font-bold text-emerald-600">{o.resolved}</span>
-                      <span className="text-[10px] text-slate-400">Resolved</span>
+                      <span className="text-[10px] text-[var(--text-muted)]">Resolved</span>
                     </div>
                     <div>
-                      <span className="block text-lg font-bold text-[#1B3A5C]">
+                      <span className="block text-lg font-bold text-[var(--brand)]">
                         {o.avgResHours !== null ? `${o.avgResHours.toFixed(1)}h` : "N/A"}
                       </span>
-                      <span className="text-[10px] text-slate-400">Avg Time</span>
+                      <span className="text-[10px] text-[var(--text-muted)]">Avg Time</span>
                     </div>
                   </div>
 
                   {/* Resolution progress bar */}
-                  <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
+                  <div className="h-1.5 w-full overflow-hidden rounded-full bg-[var(--stat-bg)]">
                     <div
                       className="h-full rounded-full bg-emerald-500 transition-all duration-500"
                       style={{ width: `${Math.min(o.resolutionRate, 100)}%` }}
                     />
                   </div>
-                  <p className="mt-1 text-right text-[10px] text-slate-400">
+                  <p className="mt-1 text-right text-[10px] text-[var(--text-muted)]">
                     {o.resolutionRate.toFixed(0)}% resolution rate
                   </p>
                 </CardContent>
@@ -299,69 +288,7 @@ export default function OfficersPage() {
         </div>
       )}
 
-      {/* ── Section 2: Activity Timeline ────────────── */}
-      <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-slate-400">
-        Activity Timeline
-      </h2>
-      <Card className="border border-slate-200 bg-white shadow-sm">
-        <CardContent className="p-4 md:p-6">
-          {loading ? (
-            <div className="space-y-4">
-              {Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="h-12 animate-pulse rounded bg-slate-200" />
-              ))}
-            </div>
-          ) : timelineEntries.length === 0 ? (
-            <p className="py-8 text-center text-sm text-slate-400">No recent activity</p>
-          ) : (
-            <div className="relative">
-              {/* Vertical connector line */}
-              <div className="absolute left-5 top-0 bottom-0 w-px bg-slate-200" />
 
-              <div className="space-y-0">
-                {timelineEntries.map((entry, idx) => {
-                  const c = entry.complaint;
-                  const officerName = c.assigned_to || "Unknown";
-                  const isResolved = entry.type === "resolved";
-
-                  return (
-                    <div key={`${c.id}-${entry.type}-${idx}`} className="relative flex gap-4 py-3">
-                      {/* Avatar */}
-                      <div className={`z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white ${isResolved ? "bg-emerald-600" : "bg-blue-600"}`}>
-                        {initials(officerName)}
-                      </div>
-
-                      {/* Content */}
-                      <div className="min-w-0 flex-1 pt-0.5">
-                        <p className="text-sm text-slate-700">
-                          <span className="font-semibold">{officerName}</span>
-                          {isResolved ? " resolved " : " was assigned "}
-                          complaint{" "}
-                          <span className="font-mono font-semibold text-[#1B3A5C]">
-                            #{ticketId(c.id)}
-                          </span>
-                          <Badge className={`ml-2 text-[10px] ${urgencyBadgeColor(c.urgency)}`}>
-                            {urgencyLabel(c.urgency)}
-                          </Badge>
-                          {" -- "}
-                          <span className="text-slate-500">{c.category || "Uncategorized"}</span>
-                          {c.location && (
-                            <span className="text-slate-400"> in {c.location}</span>
-                          )}
-                        </p>
-                        <p className="mt-0.5 flex items-center gap-1 text-xs text-slate-400">
-                          <Clock className="h-3 w-3" />
-                          {timeAgo(entry.time)}
-                        </p>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
 
       {/* ── Section 3: Officer Detail Drawer ─────────── */}
       {drawerOfficer && (
@@ -372,37 +299,37 @@ export default function OfficersPage() {
             onClick={() => setDrawerOfficer(null)}
           />
           {/* Drawer */}
-          <aside className="fixed inset-y-0 right-0 z-50 flex w-full max-w-2xl flex-col border-l border-slate-200 bg-white shadow-2xl animate-in slide-in-from-right duration-200">
+          <aside className="fixed inset-y-0 right-0 z-50 flex w-full max-w-2xl flex-col border-l border-[var(--border-color)] bg-[var(--surface)] shadow-2xl animate-in slide-in-from-right duration-200">
             {/* Header */}
-            <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4">
+            <div className="flex items-center justify-between border-b border-[var(--border-color)] px-6 py-4">
               <div className="flex items-center gap-3">
-                <div className={`flex h-11 w-11 items-center justify-center rounded-full text-sm font-bold text-white ${DEPT_COLORS[drawerOfficer.department] || "bg-slate-500"}`}>
+                <div className={`flex h-11 w-11 items-center justify-center rounded-full text-sm font-bold text-[var(--btn-primary-fg)] ${DEPT_COLORS[drawerOfficer.department] || "bg-[var(--surface-elevated)]0"}`}>
                   {initials(drawerOfficer.name)}
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-[#1B3A5C]">{drawerOfficer.name}</h3>
-                  <p className="text-xs text-slate-500">{drawerOfficer.department}</p>
+                  <h3 className="text-base font-bold text-[var(--brand)]">{drawerOfficer.name}</h3>
+                  <p className="text-xs text-[var(--text-secondary)]">{drawerOfficer.department}</p>
                 </div>
               </div>
               <button
                 onClick={() => setDrawerOfficer(null)}
-                className="rounded-lg p-2 text-slate-400 hover:bg-slate-100"
+                className="rounded-lg p-2 text-[var(--text-muted)] hover:bg-[var(--stat-bg)]"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
 
             {/* Stats row */}
-            <div className="grid grid-cols-4 gap-3 border-b border-slate-100 px-6 py-4">
+            <div className="grid grid-cols-4 gap-3 border-b border-[var(--border-subtle)] px-6 py-4">
               {[
                 { label: "Assigned", value: drawerOfficer.assigned, color: "text-blue-600" },
                 { label: "Resolved", value: drawerOfficer.resolved, color: "text-emerald-600" },
-                { label: "Avg Time", value: drawerOfficer.avgResHours !== null ? `${drawerOfficer.avgResHours.toFixed(1)}h` : "N/A", color: "text-[#1B3A5C]" },
+                { label: "Avg Time", value: drawerOfficer.avgResHours !== null ? `${drawerOfficer.avgResHours.toFixed(1)}h` : "N/A", color: "text-[var(--brand)]" },
                 { label: "Rate", value: `${drawerOfficer.resolutionRate.toFixed(0)}%`, color: "text-violet-600" },
               ].map((s) => (
                 <div key={s.label} className="text-center">
                   <span className={`block text-xl font-bold ${s.color}`}>{s.value}</span>
-                  <span className="text-[10px] text-slate-400">{s.label}</span>
+                  <span className="text-[10px] text-[var(--text-muted)]">{s.label}</span>
                 </div>
               ))}
             </div>
@@ -425,7 +352,7 @@ export default function OfficersPage() {
                 <TableBody>
                   {drawerOfficer.complaints.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={8} className="py-8 text-center text-sm text-slate-400">
+                      <TableCell colSpan={8} className="py-8 text-center text-sm text-[var(--text-muted)]">
                         No complaints assigned
                       </TableCell>
                     </TableRow>
@@ -437,14 +364,14 @@ export default function OfficersPage() {
                         return tb - ta;
                       })
                       .map((c) => (
-                        <TableRow key={c.id} className={`${statusRowColor(c.status)} hover:bg-slate-50/80`}>
-                          <TableCell className="font-mono text-xs font-medium text-[#1B3A5C]">
+                        <TableRow key={c.id} className={`${statusRowColor(c.status)} hover:bg-[var(--surface-elevated)]/80`}>
+                          <TableCell className="font-mono text-xs font-medium text-[var(--brand)]">
                             {ticketId(c.id)}
                           </TableCell>
-                          <TableCell className="max-w-[160px] truncate text-xs text-slate-600">
+                          <TableCell className="max-w-[160px] truncate text-xs text-[var(--text-secondary)]">
                             {c.summary || "--"}
                           </TableCell>
-                          <TableCell className="text-xs text-slate-500">{c.category || "--"}</TableCell>
+                          <TableCell className="text-xs text-[var(--text-secondary)]">{c.category || "--"}</TableCell>
                           <TableCell>
                             <Badge className={`text-[10px] ${urgencyBadgeColor(c.urgency)}`}>
                               {urgencyLabel(c.urgency)}
@@ -455,18 +382,18 @@ export default function OfficersPage() {
                               c.status === "resolved" ? "bg-emerald-50 text-emerald-700 border-emerald-200" :
                               c.status === "assigned" ? "bg-blue-50 text-blue-700 border-blue-200" :
                               c.status === "escalated" ? "bg-red-50 text-red-700 border-red-200" :
-                              "bg-slate-50 text-slate-600"
+                              "bg-[var(--surface-elevated)] text-[var(--text-secondary)]"
                             }`}>
                               {c.status || "open"}
                             </Badge>
                           </TableCell>
-                          <TableCell className="text-xs text-slate-500">
+                          <TableCell className="text-xs text-[var(--text-secondary)]">
                             {c.assigned_at ? fmtDate(c.assigned_at) : "--"}
                           </TableCell>
-                          <TableCell className="text-xs text-slate-500">
+                          <TableCell className="text-xs text-[var(--text-secondary)]">
                             {c.resolved_at ? fmtDate(c.resolved_at) : "--"}
                           </TableCell>
-                          <TableCell className="text-xs font-medium text-slate-600">
+                          <TableCell className="text-xs font-medium text-[var(--text-secondary)]">
                             {timeTaken(c.assigned_at, c.resolved_at)}
                           </TableCell>
                         </TableRow>

@@ -7,17 +7,17 @@ import { Settings as SettingsIcon, Shield, Bell, Globe } from "lucide-react";
 export default function SettingsPage() {
   return (
     <div className="p-4 md:p-6 lg:p-8">
-      <h1 className="mb-1 text-xl font-bold text-[#1B3A5C] md:text-2xl">Settings</h1>
-      <p className="mb-4 text-xs text-slate-500 md:mb-6 md:text-sm">
+      <h1 className="mb-1 text-xl font-bold text-[var(--brand)] dark:text-white md:text-2xl">Settings</h1>
+      <p className="mb-4 text-xs text-[var(--text-secondary)] md:mb-6 md:text-sm">
         System configuration and preferences
       </p>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6">
-        <Card className="border border-slate-200 bg-white shadow-sm">
-          <CardHeader className="border-b border-slate-100 pb-3">
+        <Card className="border border-[var(--border-color)] bg-[var(--surface)] shadow-sm">
+          <CardHeader className="border-b border-[var(--border-subtle)] pb-3">
             <div className="flex items-center gap-2">
-              <SettingsIcon className="h-4 w-4 text-[#1B3A5C]" />
-              <CardTitle className="text-sm font-semibold text-[#1B3A5C]">
+              <SettingsIcon className="h-4 w-4 text-[var(--brand)]" />
+              <CardTitle className="text-sm font-semibold text-[var(--brand)] dark:text-white">
                 General
               </CardTitle>
             </div>
@@ -25,10 +25,10 @@ export default function SettingsPage() {
           <CardContent className="space-y-4 p-5">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-slate-700">
+                <p className="text-sm font-medium text-[var(--text-primary)]">
                   Auto-refresh interval
                 </p>
-                <p className="text-xs text-slate-400">
+                <p className="text-xs text-[var(--text-muted)]">
                   Dashboard data refresh frequency
                 </p>
               </div>
@@ -38,10 +38,10 @@ export default function SettingsPage() {
             </div>
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-slate-700">
+                <p className="text-sm font-medium text-[var(--text-primary)]">
                   Default view
                 </p>
-                <p className="text-xs text-slate-400">
+                <p className="text-xs text-[var(--text-muted)]">
                   Landing page after login
                 </p>
               </div>
@@ -51,10 +51,10 @@ export default function SettingsPage() {
             </div>
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-slate-700">
+                <p className="text-sm font-medium text-[var(--text-primary)]">
                   Timezone
                 </p>
-                <p className="text-xs text-slate-400">
+                <p className="text-xs text-[var(--text-muted)]">
                   Display timestamps in
                 </p>
               </div>
@@ -65,11 +65,11 @@ export default function SettingsPage() {
           </CardContent>
         </Card>
 
-        <Card className="border border-slate-200 bg-white shadow-sm">
-          <CardHeader className="border-b border-slate-100 pb-3">
+        <Card className="border border-[var(--border-color)] bg-[var(--surface)] shadow-sm">
+          <CardHeader className="border-b border-[var(--border-subtle)] pb-3">
             <div className="flex items-center gap-2">
-              <Bell className="h-4 w-4 text-[#1B3A5C]" />
-              <CardTitle className="text-sm font-semibold text-[#1B3A5C]">
+              <Bell className="h-4 w-4 text-[var(--brand)]" />
+              <CardTitle className="text-sm font-semibold text-[var(--brand)] dark:text-white">
                 Notifications
               </CardTitle>
             </div>
@@ -77,10 +77,10 @@ export default function SettingsPage() {
           <CardContent className="space-y-4 p-5">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-slate-700">
+                <p className="text-sm font-medium text-[var(--text-primary)]">
                   WhatsApp alerts
                 </p>
-                <p className="text-xs text-slate-400">
+                <p className="text-xs text-[var(--text-muted)]">
                   Officer assignment notifications
                 </p>
               </div>
@@ -90,10 +90,10 @@ export default function SettingsPage() {
             </div>
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-slate-700">
+                <p className="text-sm font-medium text-[var(--text-primary)]">
                   Email digests
                 </p>
-                <p className="text-xs text-slate-400">
+                <p className="text-xs text-[var(--text-muted)]">
                   Daily summary via SendGrid
                 </p>
               </div>
@@ -103,10 +103,10 @@ export default function SettingsPage() {
             </div>
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-slate-700">
+                <p className="text-sm font-medium text-[var(--text-primary)]">
                   Escalation alerts
                 </p>
-                <p className="text-xs text-slate-400">
+                <p className="text-xs text-[var(--text-muted)]">
                   Critical complaint notifications
                 </p>
               </div>
@@ -117,11 +117,11 @@ export default function SettingsPage() {
           </CardContent>
         </Card>
 
-        <Card className="border border-slate-200 bg-white shadow-sm">
-          <CardHeader className="border-b border-slate-100 pb-3">
+        <Card className="border border-[var(--border-color)] bg-[var(--surface)] shadow-sm">
+          <CardHeader className="border-b border-[var(--border-subtle)] pb-3">
             <div className="flex items-center gap-2">
-              <Shield className="h-4 w-4 text-[#1B3A5C]" />
-              <CardTitle className="text-sm font-semibold text-[#1B3A5C]">
+              <Shield className="h-4 w-4 text-[var(--brand)]" />
+              <CardTitle className="text-sm font-semibold text-[var(--brand)] dark:text-white">
                 Security
               </CardTitle>
             </div>
@@ -129,10 +129,10 @@ export default function SettingsPage() {
           <CardContent className="space-y-4 p-5">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-slate-700">
+                <p className="text-sm font-medium text-[var(--text-primary)]">
                   API Access
                 </p>
-                <p className="text-xs text-slate-400">
+                <p className="text-xs text-[var(--text-muted)]">
                   Supabase RLS policies active
                 </p>
               </div>
@@ -142,10 +142,10 @@ export default function SettingsPage() {
             </div>
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-slate-700">
+                <p className="text-sm font-medium text-[var(--text-primary)]">
                   Data residency
                 </p>
-                <p className="text-xs text-slate-400">
+                <p className="text-xs text-[var(--text-muted)]">
                   Complaint data storage region
                 </p>
               </div>
@@ -156,11 +156,11 @@ export default function SettingsPage() {
           </CardContent>
         </Card>
 
-        <Card className="border border-slate-200 bg-white shadow-sm">
-          <CardHeader className="border-b border-slate-100 pb-3">
+        <Card className="border border-[var(--border-color)] bg-[var(--surface)] shadow-sm">
+          <CardHeader className="border-b border-[var(--border-subtle)] pb-3">
             <div className="flex items-center gap-2">
-              <Globe className="h-4 w-4 text-[#1B3A5C]" />
-              <CardTitle className="text-sm font-semibold text-[#1B3A5C]">
+              <Globe className="h-4 w-4 text-[var(--brand)]" />
+              <CardTitle className="text-sm font-semibold text-[var(--brand)] dark:text-white">
                 Integration
               </CardTitle>
             </div>
@@ -168,10 +168,10 @@ export default function SettingsPage() {
           <CardContent className="space-y-4 p-5">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-slate-700">
+                <p className="text-sm font-medium text-[var(--text-primary)]">
                   Supabase
                 </p>
-                <p className="text-xs text-slate-400">
+                <p className="text-xs text-[var(--text-muted)]">
                   Database backend
                 </p>
               </div>
@@ -181,10 +181,10 @@ export default function SettingsPage() {
             </div>
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-slate-700">
+                <p className="text-sm font-medium text-[var(--text-primary)]">
                   Gemini 2.5 Flash-Lite
                 </p>
-                <p className="text-xs text-slate-400">
+                <p className="text-xs text-[var(--text-muted)]">
                   AI classification engine
                 </p>
               </div>
@@ -194,10 +194,10 @@ export default function SettingsPage() {
             </div>
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-slate-700">
+                <p className="text-sm font-medium text-[var(--text-primary)]">
                   WhatsApp Business API
                 </p>
-                <p className="text-xs text-slate-400">
+                <p className="text-xs text-[var(--text-muted)]">
                   Citizen messaging platform
                 </p>
               </div>

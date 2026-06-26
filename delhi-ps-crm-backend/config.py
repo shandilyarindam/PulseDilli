@@ -40,7 +40,7 @@ class Settings(BaseSettings):
     gmail_app_password: Optional[str] = Field(None, description="Gmail app-specific password")
     
     # Application configuration
-    app_name: str = "Delhi PS-CRM"
+    app_name: str = "Jan Samadhan"
     app_version: str = "1.0.0"
     log_level: str = Field("INFO", description="Application log level")
     

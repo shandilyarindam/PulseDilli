@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 client = genai.Client(api_key=GEMINI_API_KEY)
 
-PROMPT_TEMPLATE = """You are a civic complaint classifier for Delhi PS-CRM system.
+PROMPT_TEMPLATE = """You are a civic complaint classifier for Jan Samadhan system.
 Analyze the citizen's complaint message and extract the following information.
 Return ONLY a valid JSON object with no newlines, no markdown, no backticks, no extra text whatsoever.
 
@@ -88,7 +88,7 @@ def _enhanced_prompt_with_ward_context(message: str) -> str:
         ward_context += f"- {location.title()} -> {ward}\n"
     ward_context += "...and many more locations.\n\n"
     
-    base_prompt = """You are a civic complaint classifier for Delhi PS-CRM system.
+    base_prompt = """You are a civic complaint classifier for Jan Samadhan system.
 Analyze the citizen's complaint message and extract the following information.
 Return ONLY a valid JSON object with no newlines, no markdown, no backticks, no extra text whatsoever.
 
@@ -202,7 +202,7 @@ async def analyze_complaint(message: str) -> dict:
         }
 
 
-AUDIO_PROMPT = """You are a civic complaint classifier for Delhi PS-CRM system.
+AUDIO_PROMPT = """You are a civic complaint classifier for Jan Samadhan system.
 The attached audio is a citizen complaint. It may be in Hindi, English, Urdu, Punjabi, Haryanvi, Bhojpuri, Hinglish, or any mix.
 First transcribe the audio, then analyze the complaint.
 Return ONLY a valid JSON object with no newlines, no markdown, no backticks, no extra text whatsoever.

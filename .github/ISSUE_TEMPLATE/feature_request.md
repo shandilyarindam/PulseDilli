@@ -1,6 +1,6 @@
 ---
 name: Feature Request
-about: Suggest a new feature or enhancement for Delhi PS-CRM
+about: Suggest a new feature or enhancement for Jan Samadhan
 title: "[FEATURE] "
 labels: enhancement
 assignees: ''

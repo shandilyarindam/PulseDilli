@@ -70,7 +70,7 @@ def _build_complaint_body(
 
     return f"""{greeting}
 
-A new civic complaint has been registered via the Delhi PS-CRM Citizen Grievance Portal and requires your immediate attention.
+A new civic complaint has been registered via the Jan Samadhan Citizen Grievance Portal and requires your immediate attention.
 
 TICKET DETAILS
 ----------------------------------------------
@@ -98,7 +98,7 @@ WhatsApp    : {citizen_phone}
 Please take necessary action at the earliest and update the complaint status on the portal.
 
 Regards,
-Delhi PS-CRM Automated System
+Jan Samadhan Automated System
 Civic Grievance Portal -- Government of Delhi"""
 
 
@@ -112,7 +112,7 @@ def _build_escalation_body(
 
     return f"""{greeting}
 
-A civic complaint has been AUTO-ESCALATED by the Delhi PS-CRM system.
+A civic complaint has been AUTO-ESCALATED by the Jan Samadhan system.
 
 TICKET DETAILS
 ----------------------------------------------
@@ -144,7 +144,7 @@ WhatsApp    : {complaint.get("whatsapp_number", "N/A")}
 Please take necessary action at the earliest and update the complaint status on the portal.
 
 Regards,
-Delhi PS-CRM Automated System
+Jan Samadhan Automated System
 Civic Grievance Portal -- Government of Delhi"""
 
 

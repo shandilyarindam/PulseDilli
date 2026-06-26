@@ -19,10 +19,7 @@ import ManageComplaintModal, {
 
 type ColumnId = "open" | "assigned" | "resolved";
 
-const COLUMN_META: Record<
-  ColumnId,
-  { title: string; color: string }
-> = {
+const COLUMN_META: Record<ColumnId, { title: string; color: string }> = {
   open: { title: "Open", color: "border-amber-400" },
   assigned: { title: "In Progress", color: "border-blue-400" },
   resolved: { title: "Resolved", color: "border-emerald-400" },
@@ -47,14 +44,12 @@ function urgencyBadgeColor(u: string | null): string {
 function colForStatus(s: string | null): ColumnId {
   if (s === "assigned") return "assigned";
   if (s === "resolved") return "resolved";
-  return "open"; // open, escalated, null all go here
+  return "open";
 }
 
-export default function KanbanPage() {
+export default function CommandCenter() {
   const [complaints, setComplaints] = useState<ManageComplaint[]>([]);
   const [loading, setLoading] = useState(true);
-
-  // Modal state for drag-triggered actions
   const [modalComplaint, setModalComplaint] = useState<ManageComplaint | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalFocus, setModalFocus] = useState<ModalFocus>(null);
@@ -79,7 +74,6 @@ export default function KanbanPage() {
     fetchData();
   }, [fetchData]);
 
-  // ── Build column data ──
   const columns: Record<ColumnId, ManageComplaint[]> = {
     open: [],
     assigned: [],
@@ -89,7 +83,6 @@ export default function KanbanPage() {
     columns[colForStatus(c.status)].push(c);
   }
 
-  // ── Drag handler — opens modal instead of direct update ──
   function handleDragEnd(result: DropResult) {
     const { draggableId, destination, source } = result;
     if (!destination) return;
@@ -101,43 +94,33 @@ export default function KanbanPage() {
 
     const newStatus = destination.droppableId as ColumnId;
     const oldStatus = source.droppableId as ColumnId;
-    if (newStatus === oldStatus) return; // same column reorder — no action
+    if (newStatus === oldStatus) return;
 
-    // Find the dragged complaint
     const complaint = complaints.find((c) => c.id === draggableId);
     if (!complaint) return;
 
     if (newStatus === "assigned") {
-      // Dragging to "In Progress" → open modal with assign focus
       setModalComplaint(complaint);
       setModalFocus("assign");
       setModalOpen(true);
     } else if (newStatus === "resolved") {
-      // Dragging to "Resolved" → open modal with resolve focus
       setModalComplaint(complaint);
       setModalFocus("resolve");
       setModalOpen(true);
     } else {
-      // Dragging back to "Open" — revert status directly
       revertToOpen(draggableId);
     }
   }
 
   async function revertToOpen(id: string) {
     setComplaints((prev) =>
-      prev.map((c) =>
-        c.id === id ? { ...c, status: "open" } : c
-      )
+      prev.map((c) => (c.id === id ? { ...c, status: "open" } : c))
     );
-    await supabase
-      .from("raw_complaints")
-      .update({ status: "open" })
-      .eq("id", id);
+    await supabase.from("raw_complaints").update({ status: "open" }).eq("id", id);
     fetchData();
   }
 
   function handleModalClose() {
-    // User cancelled — card stays in original column (no optimistic update was done)
     setModalOpen(false);
     setModalComplaint(null);
     setModalFocus(null);
@@ -150,15 +133,12 @@ export default function KanbanPage() {
     fetchData();
   }
 
-  // ── Derived stats ────────────────────────────────────────
   const now = Date.now();
   const oneWeekAgo = now - 7 * 86400000;
   const thisWeekAll = complaints.filter(
     (c) => c.timestamp && new Date(c.timestamp).getTime() > oneWeekAgo
   );
-  const thisWeekResolved = thisWeekAll.filter(
-    (c) => c.status === "resolved"
-  );
+  const thisWeekResolved = thisWeekAll.filter((c) => c.status === "resolved");
   const weeklyPct =
     thisWeekAll.length > 0
       ? Math.round((thisWeekResolved.length / thisWeekAll.length) * 100)
@@ -181,12 +161,12 @@ export default function KanbanPage() {
 
   return (
     <div className="p-4 md:p-6 lg:p-8">
-      <h1 className="mb-1 text-xl font-bold text-[var(--brand)] md:text-2xl">
-        Workflow Management
+      <h1 className="mb-1 text-xl font-bold text-slate-900 dark:text-white md:text-2xl">
+        Executive Command Center
       </h1>
       <p className="mb-4 max-w-2xl text-xs text-[var(--text-secondary)] md:mb-6 md:text-sm">
-        Drag and drop complaints between columns to update their status.
-        A confirmation modal will open before any changes are saved.
+        Drag and drop complaints between columns to update their status. A
+        confirmation modal will open before any changes are saved.
       </p>
 
       {loading ? (
@@ -208,10 +188,8 @@ export default function KanbanPage() {
             {COLUMN_ORDER.map((colId) => {
               const meta = COLUMN_META[colId];
               const items = columns[colId];
-
               return (
                 <div key={colId} className="flex flex-col">
-                  {/* Column header */}
                   <div
                     className={`mb-3 flex items-center justify-between rounded-lg border-l-4 bg-[var(--surface)] px-4 py-3 shadow-sm ${meta.color}`}
                   >
@@ -226,7 +204,6 @@ export default function KanbanPage() {
                     </Badge>
                   </div>
 
-                  {/* Droppable area */}
                   <Droppable droppableId={colId}>
                     {(provided, snapshot) => (
                       <div
@@ -277,9 +254,7 @@ export default function KanbanPage() {
                                       <div className="flex items-center gap-1 text-[10px] text-[var(--text-muted)]">
                                         <MapPin className="h-3 w-3" />
                                         <span className="truncate">
-                                          {c.ward ||
-                                            c.location ||
-                                            "Unknown"}
+                                          {c.ward || c.location || "Unknown"}
                                         </span>
                                       </div>
                                     )}
@@ -307,7 +282,6 @@ export default function KanbanPage() {
         </DragDropContext>
       )}
 
-      {/* ── Manage Complaint Modal (triggered by drag) ── */}
       <ManageComplaintModal
         complaint={modalComplaint}
         open={modalOpen}

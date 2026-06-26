@@ -1,4 +1,4 @@
-# Delhi PS-CRM
+# Jan Samadhan
 
 **AI-powered civic grievance management for Delhi -- file complaints in any language, get real-time updates, auto-escalation via ML.**
 

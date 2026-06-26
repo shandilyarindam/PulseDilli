@@ -60,7 +60,7 @@ export default function DashboardMap({ complaints }: Props) {
           <Popup>
             <div className="text-xs">
               <p className="font-semibold">{m.summary || "No summary"}</p>
-              <p className="text-slate-500">{m.ward || "Unknown ward"}</p>
+              <p className="text-[var(--text-secondary)]">{m.ward || "Unknown ward"}</p>
             </div>
           </Popup>
         </CircleMarker>

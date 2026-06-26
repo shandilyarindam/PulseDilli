@@ -1,6 +1,6 @@
 ---
 name: Bug Report
-about: Report a bug or unexpected behavior in Delhi PS-CRM
+about: Report a bug or unexpected behavior in Jan Samadhan
 title: "[BUG] "
 labels: bug
 assignees: ''
