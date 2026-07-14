@@ -1,8 +1,8 @@
-# Jan Samadhan
+# PulseDilli
 
 **AI-powered civic grievance management for Delhi -- file complaints in any language, get real-time updates, auto-escalation via ML.**
 
-Citizens interact entirely through WhatsApp. No app downloads, no forms, no English literacy required. Speak or type a complaint in Hindi, English, Urdu, Punjabi, Haryanvi, Bhojpuri, Hinglish, or any mix -- Gemini AI understands, classifies, and routes it to the right department. A trained ML model auto-escalates unresolved complaints. Officers manage everything through a real-time admin dashboard.
+Citizens interact entirely through WhatsApp. No app downloads, no forms, no English literacy required. Speak or type a complaint in Hindi, English, Urdu, Punjabi, Haryanvi, Bhojpuri, Hinglish, or any mix -- Gemini AI understands, classifies, and routes it to the right department. A trained ML model auto-escalates unresolved complaints. Officers manage everything through a real-time [CM dashboard](https://pulsedilli-dev1-theta.vercel.app/).
 
 ---
 
@@ -12,7 +12,7 @@ Citizens interact entirely through WhatsApp. No app downloads, no forms, no Engl
 - [Project Drive](https://drive.google.com/drive/folders/1b-VXsEavW6BJ71RT0Z1fzjyHT-kOoPHo)
 - [ML Model — Google Colab](https://colab.research.google.com/drive/1eMmbXmLwrAfmpn6QCj4pGfKrsuKsjtQl?usp=sharing)
 - [Cost Quotation Sheet](https://docs.google.com/spreadsheets/d/1Bt7-JaH7GhQL478bQmCY_5DWysrhF641/edit?usp=drivesdk&ouid=114737713209928965969&rtpof=true&sd=true)
-- [Live Dashboard](https://project-tf415.vercel.app)
+- [CM Dashboard](https://pulsedilli-dev1-theta.vercel.app/)
 
 ---
 

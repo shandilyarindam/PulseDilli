@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics Dashboard - Chief Minister of Delhi</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- ApexCharts -->
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#1a56db',
+                        success: '#0e9f6e',
+                        warning: '#ff5a1f',
+                        danger: '#f05252',
+                        background: '#f9fafb',
+                        surface: '#ffffff',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #f3f4f6;
+            color: #111827;
+        }
+        .card {
+            background-color: #ffffff;
+            border-radius: 0.75rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #e5e7eb;
+        }
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.25rem;
+        }
+        .card-title {
+            font-size: 0.875rem;
+            font-weight: 700;
+            color: #374151;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .info-icon {
+            color: #9ca3af;
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+        
+        /* Custom scrollbar for tables */
+        .table-container {
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            text-align: left;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+        th {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #6b7280;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        td {
+            padding: 1rem 0;
+            font-size: 0.875rem;
+            color: #374151;
+            border-bottom: 1px solid #f3f4f6;
+        }
+        tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-align: center;
+            display: inline-block;
+        }
+        .badge-excellent { background-color: #def7ec; color: #03543f; }
+        .badge-good { background-color: #d1fae5; color: #065f46; }
+        .badge-average { background-color: #fef3c7; color: #92400e; }
+        .badge-poor { background-color: #fee2e2; color: #991b1b; }
+
+        .progress-bar-bg {
+            background-color: #e5e7eb;
+            border-radius: 9999px;
+            height: 0.5rem;
+            width: 100%;
+            overflow: hidden;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            border-radius: 9999px;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <div class="max-w-7xl mx-auto space-y-6">
+        
+        <!-- Header -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-900">Analytics Dashboard</h1>
+                <p class="text-sm text-gray-500 mt-1">Delhi CM Office - Public Grievance Resolution</p>
+            </div>
+            <div class="mt-4 md:mt-0 flex gap-3">
+                <button class="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition">Export Report</button>
+                <button class="bg-primary text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition">Refresh Data</button>
+            </div>
+        </div>
+
+        <!-- Top Row: Charts -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Complaint Trend -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        Complaint Trend Over Time
+                        <i data-lucide="info" class="info-icon"></i>
+                    </div>
+                    <select class="text-sm border-gray-300 rounded-md shadow-sm focus:border-primary focus:ring-primary">
+                        <option>Daily View</option>
+                        <option>Weekly View</option>
+                        <option>Monthly View</option>
+                    </select>
+                </div>
+                <div id="chart-trend" class="w-full h-72"></div>
+            </div>
+
+            <!-- Complaints by Category -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        Complaints By Category
+                        <i data-lucide="info" class="info-icon"></i>
+                    </div>
+                    <a href="#" class="text-sm text-primary font-medium hover:underline">View All</a>
+                </div>
+                <div id="chart-category" class="w-full h-72"></div>
+            </div>
+        </div>
+
+        <!-- Middle Row: Performance Tables -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Department Performance -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        Department Performance
+                        <i data-lucide="info" class="info-icon"></i>
+                    </div>
+                    <a href="#" class="text-sm text-primary font-medium hover:underline">View All</a>
+                </div>
+                <div class="table-container flex-grow">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Department</th>
+                                <th>Resolved</th>
+                                <th>Pending</th>
+                                <th>Efficiency Score</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-blue-500"></div> Water</td>
+                                <td class="font-medium">92%</td>
+                                <td class="text-gray-500">8%</td>
+                                <td><span class="badge badge-excellent">Excellent</span></td>
+                            </tr>
+                            <tr>
+                                <td class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-yellow-500"></div> Electricity</td>
+                                <td class="font-medium">88%</td>
+                                <td class="text-gray-500">12%</td>
+                                <td><span class="badge badge-good">Good</span></td>
+                            </tr>
+                            <tr>
+                                <td class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-gray-700"></div> Roads</td>
+                                <td class="font-medium">74%</td>
+                                <td class="text-gray-500">26%</td>
+                                <td><span class="badge badge-average">Average</span></td>
+                            </tr>
+                            <tr>
+                                <td class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-green-500"></div> Sanitation</td>
+                                <td class="font-medium">58%</td>
+                                <td class="text-gray-500">42%</td>
+                                <td><span class="badge badge-poor">Poor</span></td>
+                            </tr>
+                            <tr>
+                                <td class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-indigo-500"></div> Traffic Police</td>
+                                <td class="font-medium">76%</td>
+                                <td class="text-gray-500">24%</td>
+                                <td><span class="badge badge-average">Average</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- District Performance -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        District Performance
+                    </div>
+                    <a href="#" class="text-sm text-primary font-medium hover:underline">View All</a>
+                </div>
+                <div class="table-container flex-grow">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>District</th>
+                                <th>Total</th>
+                                <th>Resolved</th>
+                                <th>Resolution Rate</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="font-bold text-gray-500">1</td>
+                                <td class="font-medium">South West Delhi</td>
+                                <td>1,842</td>
+                                <td>1,652</td>
+                                <td class="w-32">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-xs font-semibold">89%</span>
+                                        <div class="progress-bar-bg"><div class="progress-bar-fill bg-green-500" style="width: 89%"></div></div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="font-bold text-gray-500">2</td>
+                                <td class="font-medium">New Delhi</td>
+                                <td>1,602</td>
+                                <td>1,392</td>
+                                <td class="w-32">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-xs font-semibold">87%</span>
+                                        <div class="progress-bar-bg"><div class="progress-bar-fill bg-green-500" style="width: 87%"></div></div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="font-bold text-gray-500">3</td>
+                                <td class="font-medium">North West Delhi</td>
+                                <td>1,512</td>
+                                <td>1,221</td>
+                                <td class="w-32">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-xs font-semibold">81%</span>
+                                        <div class="progress-bar-bg"><div class="progress-bar-fill bg-green-400" style="width: 81%"></div></div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="font-bold text-gray-500">4</td>
+                                <td class="font-medium">East Delhi</td>
+                                <td>1,498</td>
+                                <td>1,124</td>
+                                <td class="w-32">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-xs font-semibold">75%</span>
+                                        <div class="progress-bar-bg"><div class="progress-bar-fill bg-yellow-400" style="width: 75%"></div></div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="font-bold text-gray-500">5</td>
+                                <td class="font-medium">South East Delhi</td>
+                                <td>1,286</td>
+                                <td>912</td>
+                                <td class="w-32">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-xs font-semibold">71%</span>
+                                        <div class="progress-bar-bg"><div class="progress-bar-fill bg-yellow-500" style="width: 71%"></div></div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Row: Resolution & Satisfaction -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            
+            <!-- Resolution Time Analytics -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        Resolution Time Analytics
+                    </div>
+                    <select class="text-sm border-gray-300 rounded-md shadow-sm focus:border-primary focus:ring-primary">
+                        <option>Average Resolution Time</option>
+                        <option>Median Resolution Time</option>
+                    </select>
+                </div>
+                <div class="flex-grow flex flex-col justify-center space-y-6 mt-4">
+                    <!-- Metric item -->
+                    <div class="flex items-center justify-between">
+                        <div class="w-1/3 text-sm font-medium text-gray-700">Power Department</div>
+                        <div class="w-1/2 px-4">
+                            <div class="progress-bar-bg h-2">
+                                <div class="progress-bar-fill bg-green-500" style="width: 15%"></div>
+                            </div>
+                        </div>
+                        <div class="w-1/6 text-right text-sm font-bold text-gray-900">0.8 days</div>
+                    </div>
+                    <!-- Metric item -->
+                    <div class="flex items-center justify-between">
+                        <div class="w-1/3 text-sm font-medium text-gray-700">Water Department</div>
+                        <div class="w-1/2 px-4">
+                            <div class="progress-bar-bg h-2">
+                                <div class="progress-bar-fill bg-blue-500" style="width: 25%"></div>
+                            </div>
+                        </div>
+                        <div class="w-1/6 text-right text-sm font-bold text-gray-900">1.2 days</div>
+                    </div>
+                    <!-- Metric item -->
+                    <div class="flex items-center justify-between">
+                        <div class="w-1/3 text-sm font-medium text-gray-700">MCD (Sanitation)</div>
+                        <div class="w-1/2 px-4">
+                            <div class="progress-bar-bg h-2">
+                                <div class="progress-bar-fill bg-purple-500" style="width: 45%"></div>
+                            </div>
+                        </div>
+                        <div class="w-1/6 text-right text-sm font-bold text-gray-900">2.1 days</div>
+                    </div>
+                    <!-- Metric item -->
+                    <div class="flex items-center justify-between">
+                        <div class="w-1/3 text-sm font-medium text-gray-700">Transport Department</div>
+                        <div class="w-1/2 px-4">
+                            <div class="progress-bar-bg h-2">
+                                <div class="progress-bar-fill bg-yellow-500" style="width: 65%"></div>
+                            </div>
+                        </div>
+                        <div class="w-1/6 text-right text-sm font-bold text-gray-900">3.7 days</div>
+                    </div>
+                    <!-- Metric item -->
+                    <div class="flex items-center justify-between">
+                        <div class="w-1/3 text-sm font-medium text-gray-700">PWD (Roads)</div>
+                        <div class="w-1/2 px-4">
+                            <div class="progress-bar-bg h-2">
+                                <div class="progress-bar-fill bg-red-500" style="width: 80%"></div>
+                            </div>
+                        </div>
+                        <div class="w-1/6 text-right text-sm font-bold text-gray-900">4.3 days</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Satisfaction Trend -->
+            <div class="card grid grid-cols-1 md:grid-cols-5 gap-6">
+                <!-- Trend Chart -->
+                <div class="md:col-span-3 flex flex-col">
+                    <div class="card-header mb-0">
+                        <div class="card-title">
+                            User Satisfaction Trend
+                            <i data-lucide="info" class="info-icon"></i>
+                        </div>
+                    </div>
+                    <div id="chart-satisfaction" class="flex-grow h-48 md:h-auto mt-2"></div>
+                </div>
+                
+                <!-- KPI Section -->
+                <div class="md:col-span-2 flex flex-col justify-center border-t md:border-t-0 md:border-l border-gray-100 pt-4 md:pt-0 md:pl-6">
+                    <h3 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Overall Satisfaction</h3>
+                    <div class="flex items-end gap-3 mb-1">
+                        <span class="text-4xl font-bold text-green-600">78%</span>
+                        <span class="flex items-center gap-1 text-sm font-semibold text-green-700 bg-green-100 px-2 py-0.5 rounded">
+                            <i data-lucide="smile" class="w-4 h-4"></i> Good
+                        </span>
+                    </div>
+                    <p class="text-xs text-gray-500 mb-6 flex items-center gap-1">
+                        <i data-lucide="arrow-up" class="w-3 h-3 text-green-500"></i>
+                        <span class="text-green-500 font-medium">5%</span> vs last month
+                    </p>
+
+                    <h3 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Breakdown</h3>
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center text-sm">
+                            <div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-green-500"></div> Very Satisfied</div>
+                            <span class="font-semibold text-gray-700">31%</span>
+                        </div>
+                        <div class="flex justify-between items-center text-sm">
+                            <div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-green-400"></div> Satisfied</div>
+                            <span class="font-semibold text-gray-700">47%</span>
+                        </div>
+                        <div class="flex justify-between items-center text-sm">
+                            <div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-yellow-400"></div> Neutral</div>
+                            <span class="font-semibold text-gray-700">14%</span>
+                        </div>
+                        <div class="flex justify-between items-center text-sm">
+                            <div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-red-400"></div> Unsatisfied</div>
+                            <span class="font-semibold text-gray-700">6%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Initialize Icons & Charts -->
+    <script>
+        // Initialize Lucide Icons
+        lucide.createIcons();
+
+        // Common Chart Options
+        const commonOptions = {
+            chart: {
+                toolbar: { show: false },
+                fontFamily: 'Inter, sans-serif'
+            },
+            dataLabels: { enabled: false },
+            tooltip: {
+                theme: 'light',
+                style: { fontSize: '12px' }
+            }
+        };
+
+        // 1. Complaint Trend Chart (Dual Line)
+        const trendOptions = {
+            ...commonOptions,
+            series: [{
+                name: 'Received',
+                data: [1100, 1250, 1050, 1400, 1150, 1300, 1250, 1550, 1100, 1350, 1300, 1600, 1400, 1950]
+            }, {
+                name: 'Resolved',
+                data: [600, 750, 500, 800, 650, 750, 600, 850, 700, 800, 750, 1000, 850, 1200]
+            }],
+            chart: { type: 'line', height: 280, ...commonOptions.chart },
+            colors: ['#1a56db', '#0e9f6e'],
+            stroke: { curve: 'smooth', width: 3 },
+            xaxis: {
+                categories: ['20 Apr', '22 Apr', '24 Apr', '26 Apr', '28 Apr', '30 Apr', '02 May', '04 May', '06 May', '08 May', '10 May', '12 May', '14 May', '16 May'],
+                labels: { style: { colors: '#6b7280', fontSize: '12px' } },
+                axisBorder: { show: false },
+                axisTicks: { show: false }
+            },
+            yaxis: {
+                labels: { style: { colors: '#6b7280', fontSize: '12px' } }
+            },
+            grid: {
+                borderColor: '#f3f4f6',
+                strokeDashArray: 4,
+                yaxis: { lines: { show: true } }
+            },
+            legend: {
+                position: 'bottom',
+                horizontalAlign: 'center',
+                markers: { radius: 12 },
+                itemMargin: { horizontal: 10 }
+            }
+        };
+        new ApexCharts(document.querySelector("#chart-trend"), trendOptions).render();
+
+        // 2. Complaints by Category Chart (Horizontal Bar)
+        const categoryOptions = {
+            ...commonOptions,
+            series: [{
+                name: 'Complaints',
+                data: [3200, 2700, 2100, 1950, 1400, 720, 320]
+            }],
+            chart: { type: 'bar', height: 280, ...commonOptions.chart },
+            colors: ['#1a56db', '#3f83f8', '#0e9f6e', '#ff8a4c', '#ff5a1f', '#9061f9', '#c084fc'],
+            plotOptions: {
+                bar: {
+                    horizontal: true,
+                    borderRadius: 4,
+                    barHeight: '40%',
+                    distributed: true
+                }
+            },
+            xaxis: {
+                labels: { show: false },
+                axisBorder: { show: false },
+                axisTicks: { show: false }
+            },
+            yaxis: {
+                labels: {
+                    style: { colors: '#374151', fontSize: '13px', fontWeight: 500 }
+                }
+            },
+            grid: { show: false },
+            legend: { show: false }
+        };
+        // Update y-axis categories with emojis/icons representation visually in HTML if possible, 
+        // but here we use text labels for simplicity and robustness in chart.
+        categoryOptions.xaxis.categories = ['Water Supply', 'Roads', 'Sanitation', 'Traffic', 'Electricity', 'Public Transport', 'Pollution'];
+        new ApexCharts(document.querySelector("#chart-category"), categoryOptions).render();
+
+        // 3. Satisfaction Trend Chart (Line with gradient fill)
+        const satisfactionOptions = {
+            ...commonOptions,
+            series: [{
+                name: 'Satisfaction Score',
+                data: [61, 64, 66, 70, 73, 78]
+            }],
+            chart: { type: 'area', height: 200, ...commonOptions.chart },
+            colors: ['#0e9f6e'],
+            fill: {
+                type: 'gradient',
+                gradient: {
+                    shadeIntensity: 1,
+                    opacityFrom: 0.4,
+                    opacityTo: 0.05,
+                    stops: [0, 90, 100]
+                }
+            },
+            stroke: { curve: 'smooth', width: 3 },
+            markers: {
+                size: 5,
+                colors: ['#fff'],
+                strokeColors: '#0e9f6e',
+                strokeWidth: 2
+            },
+            xaxis: {
+                categories: ['Dec \'24', 'Jan \'25', 'Feb \'25', 'Mar \'25', 'Apr \'25', 'May \'25'],
+                labels: { style: { colors: '#6b7280', fontSize: '11px' } },
+                axisBorder: { show: false },
+                axisTicks: { show: false }
+            },
+            yaxis: {
+                min: 0,
+                max: 100,
+                tickAmount: 4,
+                labels: { 
+                    formatter: (val) => val + '%',
+                    style: { colors: '#6b7280', fontSize: '11px' } 
+                }
+            },
+            grid: {
+                borderColor: '#f3f4f6',
+                strokeDashArray: 4,
+            },
+            dataLabels: {
+                enabled: true,
+                formatter: function (val) {
+                    return val + "%";
+                },
+                offsetY: -20,
+                style: {
+                    fontSize: '12px',
+                    colors: ["#0e9f6e"]
+                },
+                background: {
+                    enabled: false
+                }
+            }
+        };
+        new ApexCharts(document.querySelector("#chart-satisfaction"), satisfactionOptions).render();
+
+    </script>
+</body>
+</html>

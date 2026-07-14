@@ -1,4 +1,4 @@
-# Jan Samadhan Demo Walkthrough
+# PulseDilli Demo Walkthrough
 
 Complete demonstration of the AI-powered WhatsApp civic grievance management system serving 20 million citizens across Delhi's 272 wards.
 
@@ -6,7 +6,7 @@ Complete demonstration of the AI-powered WhatsApp civic grievance management sys
 
 ## Step 1: New User Registration
 
-A citizen sends their first message to the Jan Samadhan WhatsApp number.
+A citizen sends their first message to the PulseDilli WhatsApp number.
 
 **Citizen:** "hi"
 
