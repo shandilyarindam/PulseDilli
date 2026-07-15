@@ -2,7 +2,7 @@
 
 **AI-powered civic grievance management for Delhi -- file complaints in any language, get real-time updates, auto-escalation via ML.**
 
-Citizens interact entirely through WhatsApp. No app downloads, no forms, no English literacy required. Speak or type a complaint in Hindi, English, Urdu, Punjabi, Haryanvi, Bhojpuri, Hinglish, or any mix -- Gemini AI understands, classifies, and routes it to the right department. A trained ML model auto-escalates unresolved complaints. Officers manage everything through a real-time [CM dashboard](https://pulsedilli-dev1-theta.vercel.app/).
+Citizens interact entirely through WhatsApp. No app downloads, no forms, no English literacy required. Speak or type a complaint in Hindi, English, Urdu, Punjabi, Haryanvi, Bhojpuri, Hinglish, or any mix -- Gemini AI understands, classifies, and routes it to the right department. A trained ML model auto-escalates unresolved complaints.
 
 ---
 
@@ -18,9 +18,7 @@ Citizens interact entirely through WhatsApp. No app downloads, no forms, no Engl
 
 ## From Prototype to Production
 
-This system was originally prototyped using n8n automation workflows to validate the core complaint filing and routing logic. Once the prototype was validated, we rebuilt the entire backend as a production-grade Python FastAPI system with proper state management, ML-based escalation, voice note support, and a real-time admin dashboard.
-
-The n8n prototype enabled rapid iteration. The FastAPI backend enables scale.
+This system was originally prototyped using n8n. Once the prototype was validated, we rebuilt the entire backend as a production-grade Python FastAPI system with proper state management, ML-based escalation, voice note support, and a real-time CM dashboard.
 
 ---
 
@@ -123,7 +121,7 @@ https://github.com/user-attachments/assets/bf4676bb-6c87-47c9-96d0-68c3e41734ea
 - **APScheduler runs escalation check every 30 minutes** -- no manual intervention required
 - **Real-time WhatsApp notifications** for officer assignment and complaint resolution
 - **Citizen rating system (1-5)** after complaint resolution -- feedback loop for service improvement
-- **Admin dashboard with Kanban board**, geospatial map view, analytics charts, and officer accountability tracking
+- **CM dashboard with Kanban board**, geospatial map view, analytics charts, department accountability tracking and custom AI generated reports
 - **Drag-and-drop Kanban** with modal confirmation for officer assignment and resolution notes
 - **Export complaints as CSV** for offline analysis and reporting
 - **30-second webhook deduplication** prevents Meta retry spam from creating duplicate processing
@@ -133,8 +131,8 @@ https://github.com/user-attachments/assets/bf4676bb-6c87-47c9-96d0-68c3e41734ea
 ## Repository Structure
 
 ```
-Delhi-PS-CRM/
-- delhi-ps-crm-backend/          # FastAPI backend
+pulsedilli/
+- backend/          # FastAPI backend
   - main.py                      # App entry point, lifespan, scheduler
   - config.py                    # Env var loading & validation, Supabase client
   - constants.py                 # Department emails, greetings, categories
@@ -160,7 +158,7 @@ Delhi-PS-CRM/
     - escalation_model.pkl       # Trained GradientBoosting model
     - schemas.py                 # Pydantic schemas
     - README.md                  # Model documentation
-- delhi-ps-crm-dashboard/        # Next.js admin dashboard
+- pulsedilli-dev1/        # Next.js admin dashboard
 - ARCHITECTURE.md                # System architecture documentation
 - DEMO.md                        # Demo walkthrough
 - railway.toml                   # Railway deployment config
