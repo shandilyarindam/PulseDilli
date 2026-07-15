@@ -1,13 +1,3 @@
-
-
-https://github.com/user-attachments/assets/8b1567b2-12ba-4108-93ba-279bcdb47018
-
-
-
-https://github.com/user-attachments/assets/96c949c2-0d71-4bec-a619-97a0eb98ea1e
-
-
-
 # PulseDilli
 
 **AI-powered civic grievance management for Delhi -- file complaints in any language, get real-time updates, auto-escalation via ML.**
@@ -93,9 +83,11 @@ flowchart TD
 
 ## Demo Video
 
-https://github.com/user-attachments/assets/4238555b-66dd-4f98-aa0c-b54e9399c882
 
-https://github.com/user-attachments/assets/01ba7c5c-96ad-4bd6-9c4e-ddba894504a8
+
+https://github.com/user-attachments/assets/0e646ee5-aef6-4d7f-b9ad-e3094e6b0695
+
+https://github.com/user-attachments/assets/88481917-8d34-44c2-a1a9-67e56ea0d978
 
 https://github.com/user-attachments/assets/4f3f0c8d-f32a-425c-a977-d4e263168ab7
 
