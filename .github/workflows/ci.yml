@@ -1,0 +1,129 @@
+name: PulseDilli CI/CD
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  backend-tests:
+    name: Backend Tests (FastAPI)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          cd backend
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-asyncio
+
+      - name: Run Pytest
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          WHATSAPP_TOKEN: ${{ secrets.WHATSAPP_TOKEN }}
+          WHATSAPP_PHONE_NUMBER_ID: ${{ secrets.WHATSAPP_PHONE_NUMBER_ID }}
+        run: |
+          cd backend
+          pytest tests/ --doctest-modules -v
+
+  supabase-checks:
+    name: Supabase Integrity Gate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Start Supabase Local
+        # This will fail if there are syntax errors in the migrations
+        run: supabase start
+
+      - name: Verify Database Status
+        run: supabase status
+
+      - name: Verify Database Tests
+        # Runs pgTAP tests if they exist in supabase/tests
+        run: supabase db test
+
+      - name: Generate TypeScript Types & Verify
+        run: |
+          # Generate types against the local database schema
+          supabase gen types typescript --local > pulsedilli-dev1/types_gen.ts
+          
+          # Check for uncommitted changes in the generated types
+          # If the generated types differ from what's tracked in git, it means the developer
+          # applied a migration but forgot to update the frontend types, or vice versa.
+          if [[ -n $(git status --porcelain pulsedilli-dev1/types_gen.ts) ]]; then
+            echo "::error::TypeScript types are out of sync with the database schema. Please run 'supabase gen types typescript --local > pulsedilli-dev1/types_gen.ts' locally and commit the changes."
+            git diff pulsedilli-dev1/types_gen.ts
+            exit 1
+          fi
+
+  frontend-checks:
+    name: Frontend Build & Lint (Next.js)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: pulsedilli-dev1/package-lock.json
+
+      - name: Install dependencies
+        run: |
+          cd pulsedilli-dev1
+          npm ci
+
+      - name: Run Linting
+        run: |
+          cd pulsedilli-dev1
+          npm run lint
+
+      - name: Build Next.js App
+        run: |
+          cd pulsedilli-dev1
+          npm run build
+
+  deploy-frontend:
+    name: Deploy Frontend to Vercel
+    runs-on: ubuntu-latest
+    # Only run deployment if all prerequisite checks pass
+    needs: [backend-tests, supabase-checks, frontend-checks]
+    # Only deploy on pushes to main, not pull requests
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Deploy to Vercel
+        uses: amondnet/vercel-action@v20
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          vercel-args: '--prod'
+          working-directory: ./pulsedilli-dev1
